@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   application:
       name: softKit-BE
@@ -16,6 +19,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+        # validation configs
+        javax.persistence.validation.mode: auto
+        validator.apply_to_ddl: false
+        validator.autoregister_listeners: true
 
   flyway:
     enabled: true
