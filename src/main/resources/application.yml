@@ -1,3 +1,6 @@
+server:
+  port: 8080
+
 spring:
   application:
       name: softKit-BE
@@ -11,11 +14,15 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate # Use validate to Flyway manage schema
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+        # validation configs
+        javax.persistence.validation.mode: auto
+        validator.apply_to_ddl: false
+        validator.autoregister_listeners: true
 
   flyway:
     enabled: true
