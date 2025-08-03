@@ -2,6 +2,7 @@ package com.softKit.softKit_BE.controller;
 
 
 import com.softKit.softKit_BE.model.User;
+import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 
 @RestController
@@ -24,18 +24,18 @@ public class UserController {
     UserService service;
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = service.getUserById(id);
-        return user.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<UserVO> getUserById(@PathVariable Long id) {
+        var userVO = service.getUserById(id);
+        return ResponseEntity.ok(userVO);
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@Valid @RequestBody User user, BindingResult bindingResult) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserVO user, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body((buildErrorResponse(bindingResult)));
         }
         // e-mail validation
-        if(service.existsByEmail(user.getEmail())) {
+        if(service.existsByEmail(user.email())) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Validation error: email");
             errorResponse.put("errors", Map.of("email", "Email already in use!"));
@@ -43,7 +43,7 @@ public class UserController {
         }
 
         try {
-            User savedUser = service.save(user);
+            UserVO savedUser = service.save(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
