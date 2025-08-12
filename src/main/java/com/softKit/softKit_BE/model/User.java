@@ -22,7 +22,7 @@ public class User {
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "password", nullable = false, unique = true, length = 255)
+    @Column(name = "password", nullable = false, length = 255)
     private String password;
 
     @Column(name = "created_at")
@@ -51,6 +51,10 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
