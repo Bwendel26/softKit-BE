@@ -22,6 +22,9 @@ public class User {
     @Column(name = "phone", length = 20)
     private String phone;
 
+    @Column(name = "password", nullable = false, unique = true, length = 255)
+    private String password;
+
     @Column(name = "created_at")
     @JsonIgnore
     private LocalDateTime createdAt;
@@ -72,6 +75,10 @@ public class User {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public LocalDateTime getCreatedAt() {

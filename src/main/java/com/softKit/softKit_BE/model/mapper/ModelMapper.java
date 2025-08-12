@@ -3,8 +3,6 @@ package com.softKit.softKit_BE.model.mapper;
 import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.vo.UserVO;
 
-import java.util.Optional;
-
 public class ModelMapper {
 
     public UserVO userToVO(User user) {

@@ -1,7 +1,6 @@
 package com.softKit.softKit_BE.controller;
 
 
-import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.service.UserService;
 import jakarta.validation.Valid;
