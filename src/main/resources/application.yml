@@ -6,7 +6,7 @@ spring:
       name: softKit-BE
 
   datasource:
-    url: jdbc:mysql://localhost:3306/softkit?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://db:3306/softkit?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
