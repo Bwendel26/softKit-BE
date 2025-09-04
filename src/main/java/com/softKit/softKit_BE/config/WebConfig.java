@@ -1,6 +1,5 @@
-package com.softKit.softKit_BE;
+package com.softKit.softKit_BE.config;
 
-import com.softKit.softKit_BE.config.CorsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;

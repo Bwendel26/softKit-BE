@@ -1,13 +1,22 @@
 package com.softKit.softKit_BE.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.softKit.softKit_BE.model.Enums.Profile;
 import jakarta.persistence.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+@PreAuthorize("hasRole('ADMIN')")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +34,9 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Column(name = "profile", nullable = false)
+    private Profile profile;
+
     @Column(name = "created_at")
     @JsonIgnore
     private LocalDateTime createdAt;
@@ -35,10 +47,11 @@ public class User {
 
     public User() {}
 
-    public User(String name, String email, String phone) {
+    public User(String name, String email, String password, Profile profile) {
         this.name = name;
         this.email = email;
-        this.phone = phone;
+        this.password = password;
+        this.profile = profile;
     }
 
     // Lifecycle
@@ -73,6 +86,11 @@ public class User {
         this.email = email;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+
+    }
+
     public String getPhone() {
         return phone;
     }
@@ -81,8 +99,8 @@ public class User {
         this.phone = phone;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public Profile getProfile() {
+        return profile;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -91,6 +109,10 @@ public class User {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void changePassword(String encryptedPassword) {
+        this.password = encryptedPassword;
     }
 
     @Override
@@ -102,5 +124,20 @@ public class User {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + profile.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
     }
 }

@@ -1,17 +1,20 @@
 package com.softKit.softKit_BE.controller;
 
 
+import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 @RestController
@@ -23,7 +26,8 @@ public class UserController {
     UserService service;
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserVO> getUserById(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponseVO> getUserById(@PathVariable Long id) {
         var userVO = service.getUserById(id);
         return ResponseEntity.ok(userVO);
     }
@@ -40,9 +44,8 @@ public class UserController {
             errorResponse.put("errors", Map.of("email", "Email already in use!"));
             return ResponseEntity.badRequest().body(errorResponse);
         }
-
         try {
-            UserVO savedUser = service.save(user);
+            UserVO savedUser = service.createUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();

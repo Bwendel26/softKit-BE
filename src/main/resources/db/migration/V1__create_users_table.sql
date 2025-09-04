@@ -4,6 +4,7 @@ CREATE TABLE users (
     name VARCHAR(150) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    profile ENUM('CUSTOMER', 'ADMIN') NOT NULL,
     phone VARCHAR(20),
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL
