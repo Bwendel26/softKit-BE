@@ -1,6 +1,7 @@
 package com.softKit.softKit_BE.controller;
 
 
+import com.softKit.softKit_BE.model.dto.UserCreateDTO;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.service.UserService;
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserVO user, BindingResult bindingResult) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateDTO user, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body((buildErrorResponse(bindingResult)));
         }
@@ -45,11 +46,49 @@ public class UserController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
         try {
-            UserVO savedUser = service.createUser(user);
+            UserResponseVO savedUser = service.createUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "Error creating user");
+            errorResponse.put("errors", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PutMapping
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    public ResponseEntity<?> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserVO user,
+            BindingResult bindingResult)
+    {
+         if (bindingResult.hasErrors()) {
+             return ResponseEntity.badRequest().body((buildErrorResponse(bindingResult)));
+         }
+
+        // Verify if user exists
+        if(!service.existsById(id)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "User not found");
+            errorResponse.put("errors", Map.of("id", "User with id " + id + " does not exist"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+
+        // Verify if mail has in use
+        if(service.existsByEmailAndIdNot(user.email(), id)) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Validation error: email");
+            errorResponse.put("errors", Map.of("email", "Email already in use!"));
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        try {
+            UserResponseVO updatedUser = service.updateUser(id, user);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error updating user");
             errorResponse.put("errors", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }

@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,14 +17,14 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @PreAuthorize("hasRole('ADMIN')")
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, length = 150)
-    private String name;
+    @Column(name = "username", nullable = false, length = 150)
+    private String username;
 
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
@@ -47,8 +48,8 @@ public class User implements UserDetails {
 
     public User() {}
 
-    public User(String name, String email, String password, Profile profile) {
-        this.name = name;
+    public User(String username, String email, String password, Profile profile) {
+        this.username = username;
         this.email = email;
         this.password = password;
         this.profile = profile;
@@ -66,16 +67,51 @@ public class User implements UserDetails {
         updatedAt = LocalDateTime.now();
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + profile.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public Long getId() {
         return id;
     }
 
     public String getName() {
-        return name;
+        return username;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.username = name;
     }
 
     public String getEmail() {
@@ -118,26 +154,11 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-                "name='" + name + '\'' +
+                "username='" + username + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + profile.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
     }
 }

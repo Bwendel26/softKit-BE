@@ -9,7 +9,13 @@ public class ModelMapper {
 
     public UserResponseVO toResponse(User user) {
         if (user == null) return null;
-        return new UserResponseVO(user.getId(), user.getName(), user.getEmail(), user.getPhone(), user.getCreatedAt());
+        return new UserResponseVO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getCreatedAt(),
+                user.getUpdatedAt());
     }
 
     public User toEntity(UserCreateDTO dto) {
@@ -19,6 +25,17 @@ public class ModelMapper {
         usr.setEmail(dto.email());
         usr.setPhone(dto.phone());
         return usr;
+    }
+
+    public UserResponseVO userToResponseVO(User user) {
+        return new UserResponseVO(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 
     public void updateFromDto(UserUpdateDTO dto, User user) {

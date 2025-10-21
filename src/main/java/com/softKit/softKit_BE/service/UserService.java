@@ -5,6 +5,7 @@ import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
 import com.softKit.softKit_BE.model.mapper.ModelMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
+import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,8 +56,25 @@ public class UserService implements UserDetailsService {
         return mapper.toResponse(savedUser);
     }
 
+    public UserResponseVO updateUser(Long id, UserVO userVO) {
+        User user = repository.findById(id).orElseThrow();
+        user.setName(userVO.name());
+        user.setEmail(userVO.email());
+        user.setPhone(userVO.phone());
+
+        return mapper.userToResponseVO(repository.save(user));
+    }
+
     public boolean existsByEmail(String email) {
         return repository.existsByEmail(email);
+    }
+
+    public boolean existsById(Long id) {
+        return repository.existsById(id);
+    }
+
+    public boolean existsByEmailAndIdNot(String email, Long id) {
+        return repository.existsByEmailAndIdNot(email, id);
     }
 
     @Override
