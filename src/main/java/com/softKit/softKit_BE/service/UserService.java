@@ -3,11 +3,13 @@ package com.softKit.softKit_BE.service;
 import com.softKit.softKit_BE.model.DataPasswordReset;
 import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
+import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
 import com.softKit.softKit_BE.model.mapper.ModelMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,12 +19,15 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@PreAuthorize("hasRole('ADMIN')")
 public class UserService implements UserDetailsService {
 
     @Autowired
     UserRepository repository;
 
+    @Autowired
     private final ModelMapper mapper;
+
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository repository,
@@ -56,11 +61,11 @@ public class UserService implements UserDetailsService {
         return mapper.toResponse(savedUser);
     }
 
-    public UserResponseVO updateUser(Long id, UserVO userVO) {
+    public UserResponseVO updateUser(Long id, UserUpdateDTO userUpdateDTO) {
         User user = repository.findById(id).orElseThrow();
-        user.setName(userVO.name());
-        user.setEmail(userVO.email());
-        user.setPhone(userVO.phone());
+        user.setFullName(userUpdateDTO.fullName());
+        user.setEmail(userUpdateDTO.email());
+        user.setPhone(userUpdateDTO.phone());
 
         return mapper.userToResponseVO(repository.save(user));
     }

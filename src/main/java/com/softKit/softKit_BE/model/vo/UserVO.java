@@ -4,9 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UserVO(
-        @NotBlank(message = "Name is required!")
-        @Size(max = 150, message = "Name must contain until 150 chars")
-        String name,
+        @NotBlank(message = "Full Name is required!")
+        @Size(max = 200, message = "Name must contain until 200 chars")
+        String fullName,
+
+        @NotBlank(message = "Username is required!")
+        @Size(max = 150, message = "Username must contain until 150 chars")
+        String username,
 
         @NotBlank(message = "mail is required!")
         @Size(max = 150, message = "Mail must contain until 150 chars")

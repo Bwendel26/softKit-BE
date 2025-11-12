@@ -12,16 +12,19 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
-@PreAuthorize("hasRole('ADMIN')")
 public class User implements UserDetails, Serializable {
+
+    private static final long serialVersionUID = 4222094939004637717L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "full_name", nullable = false, length = 200)
+    private String fullName;
 
     @Column(name = "username", nullable = false, length = 150)
     private String username;
@@ -35,6 +38,7 @@ public class User implements UserDetails, Serializable {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "profile", nullable = false)
     private Profile profile;
 
@@ -48,7 +52,8 @@ public class User implements UserDetails, Serializable {
 
     public User() {}
 
-    public User(String username, String email, String password, Profile profile) {
+    public User(String fullName, String username, String email, String password, Profile profile) {
+        this.fullName = fullName;
         this.username = username;
         this.email = email;
         this.password = password;
@@ -79,7 +84,7 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override
@@ -106,12 +111,16 @@ public class User implements UserDetails, Serializable {
         return id;
     }
 
-    public String getName() {
-        return username;
+    public String getFullName() {
+        return fullName;
     }
 
-    public void setName(String name) {
-        this.username = name;
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -124,7 +133,6 @@ public class User implements UserDetails, Serializable {
 
     public void setPassword(String password) {
         this.password = password;
-
     }
 
     public String getPhone() {
@@ -154,11 +162,12 @@ public class User implements UserDetails, Serializable {
     @Override
     public String toString() {
         return "User{" +
-                "username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
+                " fullName= " + getFullName() + '\'' +
+                ", username= " + getUsername() + '\'' +
+                ", email= " + getEmail() + '\'' +
+                ", phone= " + getPhone() + '\'' +
+                ", createdAt= " + getCreatedAt() + '\'' +
+                ", updatedAt= " + getUpdatedAt() +
                 '}';
     }
 }

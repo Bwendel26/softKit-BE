@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
@@ -38,17 +39,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(req -> {
-//                    req.requestMatchers("/users/**").hasRole("ADMIN");
+                    req
+                            .requestMatchers("/users/**").hasRole("ADMIN")
+                            .requestMatchers("/auth/login", "auth/register").permitAll()
+                            .anyRequest().authenticated();
                 })
-                .csrf().csrfTokenRepository(new CookieCsrfTokenRepository())
-//                adicionar com base nas telas do app
-//                .formLogin(form -> form.loginPage("/login")
-//                        .defaultSuccessUrl("/")
-//                        .permitAll())
-//                .logout(logout -> logout
-//                        .logoutSuccessUrl("/login?logout")
-//                        .permitAll())
-//                .rememberMe(rememberMe -> rememberMe.key("rememberAccess"))
+
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+//                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint))
                 .build(); // add filters
     }
 }

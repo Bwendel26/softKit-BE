@@ -2,6 +2,7 @@ package com.softKit.softKit_BE.controller;
 
 
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
+import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.service.UserService;
@@ -60,7 +61,7 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<?> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserVO user,
+            @Valid @RequestBody UserUpdateDTO user,
             BindingResult bindingResult)
     {
          if (bindingResult.hasErrors()) {
