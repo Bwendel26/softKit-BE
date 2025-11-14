@@ -324,6 +324,79 @@ CREATE TABLE users (
     updated_at DATETIME NOT NULL
 );
 ```
+Dados de Teste
+Para facilitar o desenvolvimento e testes locais, disponibilizamos 50 usuários de teste. Todos possuem a senha: 123456
+<details>
+<summary>📦 Clique aqui para ver o script completo de inserção</summary>
+```sql
+-- Script de inserção de 50 usuários de teste
+-- Senha para todos: 123456
+INSERT INTO users (full_name, username, email, password, profile, phone, created_at, updated_at) VALUES
+('Ana Silva Santos', 'ana.silva', 'ana.silva@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 98765-4321', NOW(), NOW()),
+('Bruno Costa Oliveira', 'bruno.costa', 'bruno.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 99876-5432', NOW(), NOW()),
+('Carla Fernandes Lima', 'carla.fernandes', 'carla.fernandes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(31) 97654-3210', NOW(), NOW()),
+('Daniel Rodrigues Souza', 'daniel.rodrigues', 'daniel.rodrigues@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 96543-2109', NOW(), NOW()),
+('Eduarda Martins Alves', 'eduarda.martins', 'eduarda.martins@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 95432-1098', NOW(), NOW()),
+('Felipe Gomes Pereira', 'felipe.gomes', 'felipe.gomes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(61) 94321-0987', NOW(), NOW()),
+('Gabriela Santos Costa', 'gabriela.santos', 'gabriela.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(71) 93210-9876', NOW(), NOW()),
+('Henrique Lima Oliveira', 'henrique.lima', 'henrique.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(81) 92109-8765', NOW(), NOW()),
+('Isabela Alves Fernandes', 'isabela.alves', 'isabela.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(85) 91098-7654', NOW(), NOW()),
+('João Pereira Silva', 'joao.pereira', 'joao.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 90987-6543', NOW(), NOW()),
+('Karen Costa Rodrigues', 'karen.costa', 'karen.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 89876-5432', NOW(), NOW()),
+('Lucas Souza Martins', 'lucas.souza', 'lucas.souza@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(31) 88765-4321', NOW(), NOW()),
+('Mariana Oliveira Gomes', 'mariana.oliveira', 'mariana.oliveira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 87654-3210', NOW(), NOW()),
+('Nicolas Santos Lima', 'nicolas.santos', 'nicolas.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 86543-2109', NOW(), NOW()),
+('Olivia Fernandes Costa', 'olivia.fernandes', 'olivia.fernandes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(61) 85432-1098', NOW(), NOW()),
+('Pedro Alves Rodrigues', 'pedro.alves', 'pedro.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(71) 84321-0987', NOW(), NOW()),
+('Quésia Lima Santos', 'quesia.lima', 'quesia.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(81) 83210-9876', NOW(), NOW()),
+('Rafael Costa Pereira', 'rafael.costa', 'rafael.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(85) 82109-8765', NOW(), NOW()),
+('Sofia Martins Oliveira', 'sofia.martins', 'sofia.martins@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 81098-7654', NOW(), NOW()),
+('Thiago Gomes Silva', 'thiago.gomes', 'thiago.gomes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 80987-6543', NOW(), NOW()),
+('Ursula Santos Fernandes', 'ursula.santos', 'ursula.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 79876-5432', NOW(), NOW()),
+('Vitor Lima Costa', 'vitor.lima', 'vitor.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(41) 78765-4321', NOW(), NOW()),
+('Wanda Alves Rodrigues', 'wanda.alves', 'wanda.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 77654-3210', NOW(), NOW()),
+('Xavier Pereira Martins', 'xavier.pereira', 'xavier.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(61) 76543-2109', NOW(), NOW()),
+('Yasmin Souza Gomes', 'yasmin.souza', 'yasmin.souza@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(71) 75432-1098', NOW(), NOW()),
+('Zeca Oliveira Santos', 'zeca.oliveira', 'zeca.oliveira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(81) 74321-0987', NOW(), NOW()),
+('Amanda Silva Costa', 'amanda.silva', 'amanda.silva@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(85) 73210-9876', NOW(), NOW()),
+('Bernardo Costa Lima', 'bernardo.costa', 'bernardo.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 72109-8765', NOW(), NOW()),
+('Camila Fernandes Alves', 'camila.fernandes', 'camila.fernandes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 71098-7654', NOW(), NOW()),
+('Diego Rodrigues Pereira', 'diego.rodrigues', 'diego.rodrigues@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 70987-6543', NOW(), NOW()),
+('Elisa Martins Silva', 'elisa.martins', 'elisa.martins@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 69876-5432', NOW(), NOW()),
+('Fabio Gomes Souza', 'fabio.gomes', 'fabio.gomes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(51) 68765-4321', NOW(), NOW()),
+('Giovana Santos Oliveira', 'giovana.santos', 'giovana.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(61) 67654-3210', NOW(), NOW()),
+('Hugo Lima Fernandes', 'hugo.lima', 'hugo.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(71) 66543-2109', NOW(), NOW()),
+('Ingrid Alves Costa', 'ingrid.alves', 'ingrid.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(81) 65432-1098', NOW(), NOW()),
+('Julio Pereira Rodrigues', 'julio.pereira', 'julio.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(85) 64321-0987', NOW(), NOW()),
+('Karina Costa Martins', 'karina.costa', 'karina.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(11) 63210-9876', NOW(), NOW()),
+('Leonardo Souza Gomes', 'leonardo.souza', 'leonardo.souza@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 62109-8765', NOW(), NOW()),
+('Monica Oliveira Santos', 'monica.oliveira', 'monica.oliveira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 61098-7654', NOW(), NOW()),
+('Natanael Santos Lima', 'natanael.santos', 'natanael.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 60987-6543', NOW(), NOW()),
+('Otávio Fernandes Alves', 'otavio.fernandes', 'otavio.fernandes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 59876-5432', NOW(), NOW()),
+('Patrícia Lima Pereira', 'patricia.lima', 'patricia.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(61) 58765-4321', NOW(), NOW()),
+('Renan Alves Silva', 'renan.alves', 'renan.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(71) 57654-3210', NOW(), NOW()),
+('Sabrina Costa Rodrigues', 'sabrina.costa', 'sabrina.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(81) 56543-2109', NOW(), NOW()),
+('Tiago Martins Souza', 'tiago.martins', 'tiago.martins@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(85) 55432-1098', NOW(), NOW()),
+('Valentina Gomes Oliveira', 'valentina.gomes', 'valentina.gomes@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 54321-0987', NOW(), NOW()),
+('Wagner Santos Costa', 'wagner.santos', 'wagner.santos@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'ADMIN', '(21) 53210-9876', NOW(), NOW()),
+('Ximena Lima Fernandes', 'ximena.lima', 'ximena.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 52109-8765', NOW(), NOW()),
+('Yuri Alves Santos', 'yuri.alves', 'yuri.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 51098-7654', NOW(), NOW()),
+('Zilda Pereira Lima', 'zilda.pereira', 'zilda.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 50987-6543', NOW(), NOW());
+```
+</details>
+Usuários de Teste Disponíveis
+EmailPerfilSenhacarla.fernandes@email.comADMIN123456gabriela.santos@email.comADMIN123456lucas.souza@email.comADMIN123456quesia.lima@email.comADMIN123456vitor.lima@email.comADMIN123456amanda.silva@email.comADMIN123456fabio.gomes@email.comADMIN123456karina.costa@email.comADMIN123456patricia.lima@email.comADMIN123456wagner.santos@email.comADMIN123456ana.silva@email.comCUSTOMER123456bruno.costa@email.comCUSTOMER123456... (40 outros usuários CUSTOMER)CUSTOMER123456
+💡 Dica: Para importar os dados de teste:
+
+```bash
+# Conecte ao MySQL
+mysql -u root -p softkit
+
+# Execute o script
+source caminho/para/script_usuarios_teste.sql
+
+# Ou copie e cole o conteúdo diretamente no MySQL Workbench
+```
 
 ### Criar nova migração
 
