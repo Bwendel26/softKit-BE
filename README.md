@@ -325,12 +325,16 @@ CREATE TABLE users (
 );
 ```
 Dados de Teste
+
 Para facilitar o desenvolvimento e testes locais, disponibilizamos 50 usuários de teste. Todos possuem a senha: 123456
+
 <details>
 <summary>📦 Clique aqui para ver o script completo de inserção</summary>
 ```sql
+
 -- Script de inserção de 50 usuários de teste
 -- Senha para todos: 123456
+
 INSERT INTO users (full_name, username, email, password, profile, phone, created_at, updated_at) VALUES
 ('Ana Silva Santos', 'ana.silva', 'ana.silva@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 98765-4321', NOW(), NOW()),
 ('Bruno Costa Oliveira', 'bruno.costa', 'bruno.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 99876-5432', NOW(), NOW()),
@@ -382,10 +386,25 @@ INSERT INTO users (full_name, username, email, password, profile, phone, created
 ('Ximena Lima Fernandes', 'ximena.lima', 'ximena.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 52109-8765', NOW(), NOW()),
 ('Yuri Alves Santos', 'yuri.alves', 'yuri.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 51098-7654', NOW(), NOW()),
 ('Zilda Pereira Lima', 'zilda.pereira', 'zilda.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 50987-6543', NOW(), NOW());
+
 ```
 </details>
 Usuários de Teste Disponíveis
-EmailPerfilSenhacarla.fernandes@email.comADMIN123456gabriela.santos@email.comADMIN123456lucas.souza@email.comADMIN123456quesia.lima@email.comADMIN123456vitor.lima@email.comADMIN123456amanda.silva@email.comADMIN123456fabio.gomes@email.comADMIN123456karina.costa@email.comADMIN123456patricia.lima@email.comADMIN123456wagner.santos@email.comADMIN123456ana.silva@email.comCUSTOMER123456bruno.costa@email.comCUSTOMER123456... (40 outros usuários CUSTOMER)CUSTOMER123456
+Email,Perfil,Senha
+carla.fernandes@email.com,ADMIN,123456
+gabriela.santos@email.com,ADMIN,123456
+lucas.souza@email.com,ADMIN,123456
+quesia.lima@email.com,ADMIN,123456
+vitor.lima@email.com,ADMIN,123456
+amanda.silva@email.com,ADMIN,123456
+fabio.gomes@email.com,ADMIN,123456
+karina.costa@email.com,ADMIN,123456
+patricia.lima@email.com,ADMIN,123456
+wagner.santos@email.com,ADMIN,123456
+ana.silva@email.com,CUSTOMER,123456
+bruno.costa@email.com,CUSTOMER,123456
+... (40 outros usuários CUSTOMER),CUSTOMER,123456
+
 💡 Dica: Para importar os dados de teste:
 
 ```bash
