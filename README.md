@@ -518,8 +518,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **Bruno Fernandes**
 
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [seu-linkedin](https://linkedin.com/in/seu-perfil)
+- GitHub: [@Bwendel](https://github.com/Bwendel26/)
+- LinkedIn: [LinkedIn](www.linkedin.com/in/brunowfcdev/)
 
 ## 🙏 Agradecimentos
 
