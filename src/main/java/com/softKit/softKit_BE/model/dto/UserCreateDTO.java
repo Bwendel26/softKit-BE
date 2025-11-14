@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UserCreateDTO(
-        @NotBlank @Size(max = 150) String name,
+        @NotBlank @Size(max = 200) String fullName,
+        @NotBlank @Size(max = 150) String username,
         @Email @NotBlank @Size(max = 150) String email,
         @Size(max = 20) String phone,
         @NotBlank @Size(min = 8, max = 255)
