@@ -5,6 +5,7 @@ import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
 import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
 import com.softKit.softKit_BE.model.mapper.ModelMapper;
+import com.softKit.softKit_BE.model.mapper.UserMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.repository.UserRepository;
@@ -23,16 +24,13 @@ import java.util.UUID;
 @PreAuthorize("hasRole('ADMIN')")
 public class UserService implements UserDetailsService {
 
-    @Autowired
     UserRepository repository;
-
-    @Autowired
-    private final ModelMapper mapper;
-
+    private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public UserService(UserRepository repository,
-                       ModelMapper mapper,
+                       UserMapper mapper,
                        PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.mapper = mapper;
@@ -42,7 +40,7 @@ public class UserService implements UserDetailsService {
     public UserResponseVO getUserById(Long id) {
         User user = repository.findById(id).orElseThrow(() ->
                 new RuntimeException("User nor found"));
-        return mapper.toResponse(user);
+        return mapper.toUserResponseVO(user);
     }
 
     public UserResponseVO createUser(UserCreateDTO dto) {
@@ -54,21 +52,22 @@ public class UserService implements UserDetailsService {
 //        TODO: CREATE A SOLUTION TO WHEN THE USER RECEIVES AN ACCESS HE MUST HAVE TO CHANGE THE PASSWORD - COMMENTED CODE IS GENERATING A NEW RANDOM PASSWORD
 //        String firstPassword = UUID.randomUUID().toString().substring(0, 8);
 //        System.out.println("Generated PASSWORD: " + firstPassword);
+
         String hashedPassword = passwordEncoder.encode(dto.password());
         user.setPassword(hashedPassword);
 
         User savedUser = repository.save(user);
 
-        return mapper.toResponse(savedUser);
+        return mapper.toUserResponseVO(savedUser);
     }
 
-    public UserResponseVO updateUser(Long id, UserUpdateDTO userUpdateDTO) {
-        User user = repository.findById(id).orElseThrow();
-        user.setFullName(userUpdateDTO.fullName());
-        user.setEmail(userUpdateDTO.email());
-        user.setPhone(userUpdateDTO.phone());
+    public UserResponseVO updateUser(Long id, UserUpdateDTO dto) {
+        User user = repository.findById(id).orElseThrow(() ->
+                new RuntimeException("User nor found"));
+        mapper.updateEntityFromDto(dto, user);
+        User updatedUser = repository.save(user);
 
-        return mapper.userToResponseVO(repository.save(user));
+        return mapper.toUserResponseVO(repository.save(user));
     }
 
     public boolean existsByEmail(String email) {
@@ -92,7 +91,7 @@ public class UserService implements UserDetailsService {
     public void changePassword(DataPasswordReset data, User loggedIn) {
         if(!passwordEncoder.matches(data.password(), loggedIn.getPassword())
         || !data.newPassword().equals(data.confirmNewPassword())) {
-            throw new MatchException("Passwords don't match!", new Throwable());
+            throw new IllegalArgumentException("Passwords don't match");
         }
 
         String encryptedPassword = passwordEncoder.encode(data.newPassword());
