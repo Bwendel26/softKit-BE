@@ -324,17 +324,8 @@ CREATE TABLE users (
     updated_at DATETIME NOT NULL
 );
 ```
-Dados de Teste
-
-Para facilitar o desenvolvimento e testes locais, disponibilizamos 50 usuários de teste. Todos possuem a senha: 123456
-
-<details>
-<summary>📦 Clique aqui para ver o script completo de inserção</summary>
+### DUMP de dados pra testes locais
 ```sql
-
--- Script de inserção de 50 usuários de teste
--- Senha para todos: 123456
-
 INSERT INTO users (full_name, username, email, password, profile, phone, created_at, updated_at) VALUES
 ('Ana Silva Santos', 'ana.silva', 'ana.silva@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(11) 98765-4321', NOW(), NOW()),
 ('Bruno Costa Oliveira', 'bruno.costa', 'bruno.costa@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(21) 99876-5432', NOW(), NOW()),
@@ -386,36 +377,14 @@ INSERT INTO users (full_name, username, email, password, profile, phone, created
 ('Ximena Lima Fernandes', 'ximena.lima', 'ximena.lima@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(31) 52109-8765', NOW(), NOW()),
 ('Yuri Alves Santos', 'yuri.alves', 'yuri.alves@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(41) 51098-7654', NOW(), NOW()),
 ('Zilda Pereira Lima', 'zilda.pereira', 'zilda.pereira@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa', 'CUSTOMER', '(51) 50987-6543', NOW(), NOW());
-
 ```
-</details>
-Usuários de Teste Disponíveis
-Email,Perfil,Senha
-carla.fernandes@email.com,ADMIN,123456
-gabriela.santos@email.com,ADMIN,123456
-lucas.souza@email.com,ADMIN,123456
-quesia.lima@email.com,ADMIN,123456
-vitor.lima@email.com,ADMIN,123456
-amanda.silva@email.com,ADMIN,123456
-fabio.gomes@email.com,ADMIN,123456
-karina.costa@email.com,ADMIN,123456
-patricia.lima@email.com,ADMIN,123456
-wagner.santos@email.com,ADMIN,123456
-ana.silva@email.com,CUSTOMER,123456
-bruno.costa@email.com,CUSTOMER,123456
-... (40 outros usuários CUSTOMER),CUSTOMER,123456
 
-💡 Dica: Para importar os dados de teste:
+## 🔑 Informações de Acesso para Teste
 
-```bash
-# Conecte ao MySQL
-mysql -u root -p softkit
-
-# Execute o script
-source caminho/para/script_usuarios_teste.sql
-
-# Ou copie e cole o conteúdo diretamente no MySQL Workbench
-```
+Perfil,Exemplo de Email,Senha (Texto Simples)
+ADMIN,carla.fernandes@email.com,123456
+CUSTOMER,ana.silva@email.com,123456
+## ❗Note que todos os usuários, independentemente do perfil, usam a mesma senha de hash. A senha em texto simples correspondente ao hash $2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa é 123456.
 
 ### Criar nova migração
 
