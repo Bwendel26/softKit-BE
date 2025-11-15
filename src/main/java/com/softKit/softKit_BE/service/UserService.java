@@ -9,6 +9,7 @@ import com.softKit.softKit_BE.model.mapper.UserMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.repository.UserRepository;
+import org.hibernate.annotations.SQLSelect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,8 +18,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @PreAuthorize("hasRole('ADMIN')")
@@ -41,6 +44,19 @@ public class UserService implements UserDetailsService {
         User user = repository.findById(id).orElseThrow(() ->
                 new RuntimeException("User nor found"));
         return mapper.toUserResponseVO(user);
+    }
+
+    public List<UserResponseVO> getAllUsers() {
+        try {
+            List<User> users = repository.findAll();
+
+            return users.stream()
+                    .map(mapper::toUserResponseVO)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching users", e);
+        }
     }
 
     public UserResponseVO createUser(UserCreateDTO dto) {

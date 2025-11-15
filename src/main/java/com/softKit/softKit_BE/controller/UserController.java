@@ -1,6 +1,7 @@
 package com.softKit.softKit_BE.controller;
 
 
+import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
 import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
@@ -15,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +34,13 @@ public class UserController {
     public ResponseEntity<UserResponseVO> getUserById(@PathVariable Long id) {
         var userVO = service.getUserById(id);
         return ResponseEntity.ok(userVO);
+    }
+
+    @GetMapping()
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponseVO>> getAllUsers() {
+        var users = service.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping
