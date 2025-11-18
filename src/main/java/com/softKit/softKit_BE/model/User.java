@@ -147,6 +147,10 @@ public class User implements UserDetails, Serializable {
         return profile;
     }
 
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }

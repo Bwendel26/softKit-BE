@@ -28,7 +28,7 @@ public class JwtService {
                 .compact();
     }
 
-    private String extractUsername(String token) {
+    public String extractUsername(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSingKey())
                 .build()
@@ -37,7 +37,7 @@ public class JwtService {
                 .getSubject();
     }
 
-    private boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) {
         return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 

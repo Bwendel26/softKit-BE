@@ -4,12 +4,9 @@ import com.softKit.softKit_BE.model.DataPasswordReset;
 import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.UserCreateDTO;
 import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
-import com.softKit.softKit_BE.model.mapper.ModelMapper;
 import com.softKit.softKit_BE.model.mapper.UserMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
-import com.softKit.softKit_BE.model.vo.UserVO;
 import com.softKit.softKit_BE.repository.UserRepository;
-import org.hibernate.annotations.SQLSelect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,9 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,8 +96,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repository.findByEmailIgnoreCase(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found!"));
+        try {
+            return repository.findByUsername(username);
+        } catch (Exception e) {
+            throw new UsernameNotFoundException("Username not found! ", e);
+        }
     }
 
     public void changePassword(DataPasswordReset data, User loggedIn) {
