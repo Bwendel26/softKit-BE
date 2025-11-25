@@ -36,7 +36,7 @@ public class UserController {
         return ResponseEntity.ok(userVO);
     }
 
-    @GetMapping()
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponseVO>> getAllUsers() {
         var users = service.getAllUsers();

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 public record UserResponseVO(Long id,
                              String fullName,
-                             String username,
                              String email,
                              String phone,
                              LocalDateTime createdAt,

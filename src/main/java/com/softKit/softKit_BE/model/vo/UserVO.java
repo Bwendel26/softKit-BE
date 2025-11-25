@@ -8,10 +8,6 @@ public record UserVO(
         @Size(max = 200, message = "Name must contain until 200 chars")
         String fullName,
 
-        @NotBlank(message = "Username is required!")
-        @Size(max = 150, message = "Username must contain until 150 chars")
-        String username,
-
         @NotBlank(message = "mail is required!")
         @Size(max = 150, message = "Mail must contain until 150 chars")
         String email,

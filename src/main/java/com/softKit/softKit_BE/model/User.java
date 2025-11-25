@@ -26,9 +26,6 @@ public class User implements UserDetails, Serializable {
     @Column(name = "full_name", nullable = false, length = 200)
     private String fullName;
 
-    @Column(name = "username", nullable = false, length = 150)
-    private String username;
-
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
@@ -52,9 +49,8 @@ public class User implements UserDetails, Serializable {
 
     public User() {}
 
-    public User(String fullName, String username, String email, String password, Profile profile) {
+    public User(String fullName, String email, String password, Profile profile) {
         this.fullName = fullName;
-        this.username = username;
         this.email = email;
         this.password = password;
         this.profile = profile;
@@ -84,7 +80,7 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
@@ -120,7 +116,7 @@ public class User implements UserDetails, Serializable {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.email = username;
     }
 
     public String getEmail() {
@@ -167,7 +163,6 @@ public class User implements UserDetails, Serializable {
     public String toString() {
         return "User{" +
                 " fullName= " + getFullName() + '\'' +
-                ", username= " + getUsername() + '\'' +
                 ", email= " + getEmail() + '\'' +
                 ", phone= " + getPhone() + '\'' +
                 ", createdAt= " + getCreatedAt() + '\'' +

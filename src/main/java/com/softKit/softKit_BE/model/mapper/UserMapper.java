@@ -21,7 +21,6 @@ public interface UserMapper {
     //UserCreateDTO to User entity
 
     @Mapping(target = "fullName", source = "fullName")
-    @Mapping(target = "username", source = "username")
     @Mapping(target = "email", source = "email")
     @Mapping(target = "phone", source = "phone")
     User toEntity(UserCreateDTO dto);
@@ -30,7 +29,7 @@ public interface UserMapper {
     //updates User data with UserUpdateDTO data
     //ignores null from DTO
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "profile", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

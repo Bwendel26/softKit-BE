@@ -73,10 +73,6 @@ public class AuthService {
             throw new IllegalArgumentException("Email already exists");
         }
 
-        if (repository.findByUsername(dto.username()) != null) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-
         User user = mapper.toEntity(dto);
         String hashedPassword = passwordEncoder.encode(dto.password());
         user.setPassword(hashedPassword);
@@ -89,8 +85,8 @@ public class AuthService {
     @Transactional(readOnly = true)
     public boolean validateToken(String token) {
         try {
-            String username = jwtService.extractUsername(token);
-            User user = repository.findByUsername(username);
+            String email = jwtService.extractUsername(token);
+            User user = repository.findByEmail(email);
 
             if (user == null) {
                 return false;
@@ -105,4 +101,6 @@ public class AuthService {
     public String extractEmailFromToken(String token) {
         return jwtService.extractUsername(token);
     }
+
+
 }
