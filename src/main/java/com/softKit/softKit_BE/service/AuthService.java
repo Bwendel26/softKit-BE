@@ -18,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -90,9 +92,9 @@ public class AuthService {
 
             if (user == null) {
                 return false;
+            } else {
+                return jwtService.isTokenValid(token, user);
             }
-
-            return jwtService.isTokenValid(token, user);
         } catch (Exception e) {
             return false;
         }
