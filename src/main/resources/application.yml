@@ -54,3 +54,7 @@ logging:
   level:
     org.flywaydb: DEBUG
     org.hibernate.SQL: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
