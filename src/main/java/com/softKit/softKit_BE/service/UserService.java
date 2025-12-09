@@ -8,19 +8,16 @@ import com.softKit.softKit_BE.model.mapper.UserMapper;
 import com.softKit.softKit_BE.model.vo.UserResponseVO;
 import com.softKit.softKit_BE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@PreAuthorize("hasRole('ADMIN')")
 public class UserService implements UserDetailsService {
 
     UserRepository repository;
@@ -66,7 +63,7 @@ public class UserService implements UserDetailsService {
 //        System.out.println("Generated PASSWORD: " + firstPassword);
 
         String hashedPassword = passwordEncoder.encode(dto.password());
-        user.setPassword(hashedPassword);
+        user.setPasswordHash(hashedPassword);
 
         User savedUser = repository.save(user);
 
