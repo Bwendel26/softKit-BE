@@ -14,7 +14,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY = "secret-key_256bits";// get .env
+    private final String SECRET_KEY = "kKm5G2MIj9aMOK/y6v0tXpLHmv8nciqTmrLb+HlJk3k=";// get .env
     private final long EXPIRATION = 1000 * 60 * 60;
 
     public String generateToken(UserDetails userDetails) {
