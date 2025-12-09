@@ -1,6 +1,7 @@
 package com.softKit.softKit_BE.service;
 
-import com.softKit.softKit_BE.model.Enums.Profile;
+import com.softKit.softKit_BE.model.Enums.Role;
+import com.softKit.softKit_BE.model.Enums.Status;
 import com.softKit.softKit_BE.model.User;
 import com.softKit.softKit_BE.model.dto.LoginRequestDTO;
 import com.softKit.softKit_BE.model.dto.LoginResponseDTO;
@@ -18,7 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -77,8 +78,10 @@ public class AuthService {
 
         User user = mapper.toEntity(dto);
         String hashedPassword = passwordEncoder.encode(dto.password());
-        user.setPassword(hashedPassword);
-        user.setProfile(Profile.CUSTOMER); //default profile
+        user.setPasswordHash(hashedPassword);
+        user.setRole(Role.CUSTOMER); //default profile
+		user.setStatus(Status.ACTIVE);
+		user.setEmailVerifiedAt(LocalDateTime.now());
         User savedUser = repository.save(user);
 
         return mapper.toUserResponseVO(savedUser);

@@ -1,9 +1,9 @@
 package com.softKit.softKit_BE.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.softKit.softKit_BE.model.Enums.Profile;
+import com.softKit.softKit_BE.model.Enums.Role;
+import com.softKit.softKit_BE.model.Enums.Status;
 import jakarta.persistence.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,18 +29,34 @@ public class User implements UserDetails, Serializable {
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "phone", length = 20)
-    private String phone;
+	@Column(name = "email_verified_at")
+	private LocalDateTime emailVerifiedAt;
 
-    @Column(name = "password", nullable = false, length = 255)
-    private String password;
+    @Column(name = "phone_e164", length = 20)
+    private String phoneE164;
+
+	@Column(name = "password_hash", nullable = false, length = 255)
+	private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "profile", nullable = false)
-    private Profile profile;
+    @Column(name = "role", nullable = false)
+	private Role role = Role.CUSTOMER;
 
-    @Column(name = "created_at")
-    @JsonIgnore
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private Status status = Status.PENDING;
+
+	@Column(name = "failed_login_attempts", nullable = false)
+	private int failedLoginAttempts = 0;
+
+	@Column(name = "locked_until")
+	private LocalDateTime lockedUntil;
+
+	@Column(name = "last_login_at")
+	private LocalDateTime lastLoginAt;
+
+	@JsonIgnore
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @JsonIgnore
@@ -49,33 +65,32 @@ public class User implements UserDetails, Serializable {
 
     public User() {}
 
-    public User(String fullName, String email, String password, Profile profile) {
+    public User(String fullName, String email, String passwordHash, Role role) {
         this.fullName = fullName;
         this.email = email;
-        this.password = password;
-        this.profile = profile;
+        this.passwordHash = passwordHash;
+        this.role = role;
     }
 
     // Lifecycle
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+        this.createdAt = LocalDateTime.now();
+	}
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + profile.name()));
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return passwordHash;
     }
 
     @Override
@@ -90,7 +105,7 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+		return lockedUntil == null || lockedUntil.isBefore(LocalDateTime.now());
     }
 
     @Override
@@ -100,7 +115,7 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public boolean isEnabled() {
-        return true;
+		return status == Status.ACTIVE;
     }
 
     public Long getId() {
@@ -127,27 +142,71 @@ public class User implements UserDetails, Serializable {
         this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+	public String getPasswordHash() {
+		return passwordHash;
+	}
+
+    public void setPasswordHash(String password) {
+        this.passwordHash = password;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getPhoneE164() {
+        return phoneE164;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setPhoneE164(String phoneE164) {
+        this.phoneE164 = phoneE164;
     }
 
-    public Profile getProfile() {
-        return profile;
+    public Role getRole() {
+        return role;
     }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
+    public void setRole(Role role) {
+        this.role = role;
     }
 
-    public LocalDateTime getCreatedAt() {
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public int getFailedLoginAttempts() {
+		return failedLoginAttempts;
+	}
+
+	public void setFailedLoginAttempts(int failedLoginAttempts) {
+		this.failedLoginAttempts = failedLoginAttempts;
+	}
+
+	public LocalDateTime getLockedUntil() {
+		return lockedUntil;
+	}
+
+	public void setLockedUntil(LocalDateTime lockedUntil) {
+		this.lockedUntil = lockedUntil;
+	}
+
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
+	public LocalDateTime getEmailVerifiedAt() {
+		return emailVerifiedAt;
+	}
+
+	public void setEmailVerifiedAt(LocalDateTime emailVerifiedAt) {
+		this.emailVerifiedAt = emailVerifiedAt;
+	}
+
+	public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
@@ -156,7 +215,7 @@ public class User implements UserDetails, Serializable {
     }
 
     public void changePassword(String encryptedPassword) {
-        this.password = encryptedPassword;
+        this.passwordHash = encryptedPassword;
     }
 
     @Override
@@ -164,7 +223,7 @@ public class User implements UserDetails, Serializable {
         return "User{" +
                 " fullName= " + getFullName() + '\'' +
                 ", email= " + getEmail() + '\'' +
-                ", phone= " + getPhone() + '\'' +
+                ", phone= " + getPhoneE164() + '\'' +
                 ", createdAt= " + getCreatedAt() + '\'' +
                 ", updatedAt= " + getUpdatedAt() +
                 '}';

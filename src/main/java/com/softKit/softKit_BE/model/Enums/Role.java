@@ -1,6 +1,6 @@
 package com.softKit.softKit_BE.model.Enums;
 
-public enum Profile {
+public enum Role {
     ADMIN,
     CUSTOMER;
 }
