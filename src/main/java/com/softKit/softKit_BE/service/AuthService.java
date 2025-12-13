@@ -1,15 +1,20 @@
 package com.softKit.softKit_BE.service;
 
+import com.softKit.softKit_BE.exception.EmailAlreadyInUseException;
+import com.softKit.softKit_BE.exception.InvalidTokenException;
 import com.softKit.softKit_BE.model.Enums.Role;
 import com.softKit.softKit_BE.model.Enums.Status;
+import com.softKit.softKit_BE.model.PasswordResetToken;
 import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.dto.LoginRequestDTO;
-import com.softKit.softKit_BE.model.dto.LoginResponseDTO;
-import com.softKit.softKit_BE.model.dto.UserCreateDTO;
+import com.softKit.softKit_BE.model.dto.requests.ForgotPasswordRequest;
+import com.softKit.softKit_BE.model.dto.requests.LoginRequest;
+import com.softKit.softKit_BE.model.dto.requests.RegisterRequest;
+import com.softKit.softKit_BE.model.dto.requests.ResetPasswordRequest;
+import com.softKit.softKit_BE.model.dto.responses.LoginResponse;
+import com.softKit.softKit_BE.model.dto.responses.RegisterResponse;
 import com.softKit.softKit_BE.model.mapper.UserMapper;
-import com.softKit.softKit_BE.model.vo.UserResponseVO;
+import com.softKit.softKit_BE.repository.PasswordResetTokenRepository;
 import com.softKit.softKit_BE.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,33 +25,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
 
     private final UserRepository repository;
+	private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
     public AuthService(
-        UserRepository repository,
-        UserMapper mapper,
-        PasswordEncoder passwordEncoder,
-        JwtService jwtService,
-        AuthenticationManager authenticationManager
+			UserRepository repository,
+			PasswordResetTokenRepository passwordResetTokenRepository,
+			UserMapper mapper,
+			PasswordEncoder passwordEncoder,
+			JwtService jwtService,
+			AuthenticationManager authenticationManager
     ) {
         this.repository = repository;
-        this.mapper = mapper;
+		this.passwordResetTokenRepository = passwordResetTokenRepository;
+		this.mapper = mapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
 
     @Transactional(readOnly = true)
-    public LoginResponseDTO login(LoginRequestDTO request) {
+    public LoginResponse login(LoginRequest request) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -58,34 +66,122 @@ public class AuthService {
             User user = (User) auth.getPrincipal();
             String token = jwtService.generateToken(user);
 
-            return new LoginResponseDTO(
+            return new LoginResponse(
                     token,
                     "Bearer",
-                    3600000L // 1hour
+					jwtService.getExpirationMs(),
+					mapper.toUserResponse(user)
             );
         } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username and password", e);
+            throw new BadCredentialsException("Invalid username or password", e);
         }
 
     }
 
     @Transactional
-    public UserResponseVO register(UserCreateDTO dto) {
+    public RegisterResponse register(RegisterRequest registerRequest) {
 
-        if (repository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
+		if (repository.existsByEmail(registerRequest.email())) {
+			throw new EmailAlreadyInUseException(registerRequest.email());
+		}
 
-        User user = mapper.toEntity(dto);
-        String hashedPassword = passwordEncoder.encode(dto.password());
+        User user = mapper.fromRegisterRequestToEntity(registerRequest);
+
+        String hashedPassword = passwordEncoder.encode(registerRequest.password());
+
         user.setPasswordHash(hashedPassword);
         user.setRole(Role.CUSTOMER); //default profile
-		user.setStatus(Status.ACTIVE);
+		user.setStatus(Status.ACTIVE); // ou PENDING TODO: verify flow for default user status
 		user.setEmailVerifiedAt(LocalDateTime.now());
+
         User savedUser = repository.save(user);
 
-        return mapper.toUserResponseVO(savedUser);
+        return mapper.toRegisterResponse(savedUser);
     }
+
+	@Transactional(readOnly = true)
+	public LoginResponse refreshToken(String authHeader) {
+
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			throw new BadCredentialsException("Invalid Authorization header");
+		}
+
+		String token = authHeader.substring(7);
+
+		try {
+			String email = jwtService.extractUsername(token);
+
+			User user = repository.findByEmail(email);
+			if (user == null) {
+				throw new BadCredentialsException("User not found for provided token");
+			}
+
+			if (!jwtService.isTokenValid(token, user)) {
+				throw new BadCredentialsException("Invalid or expired token");
+			}
+
+			// Gera um NOVO token
+			String newToken = jwtService.generateToken(user);
+
+			return new LoginResponse(
+					newToken,
+					"Bearer",
+					jwtService.getExpirationMs(),
+					mapper.toUserResponse(user)
+			);
+		} catch (AuthenticationException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BadCredentialsException("Invalid or expired token", e);
+		}
+	}
+
+	@Transactional
+	public void forgotPassword(ForgotPasswordRequest request) {
+
+		User user = repository.findByEmail(request.email());
+
+		// Segurança: não expor se o e-mail existe ou não
+		if (user == null) {
+			// silenciosamente não faz nada
+			return;
+		}
+
+		String rawToken = UUID.randomUUID().toString();
+
+		PasswordResetToken resetToken = new PasswordResetToken();
+		resetToken.setToken(rawToken);
+		resetToken.setUser(user);
+		resetToken.setExpiresAt(LocalDateTime.now().plusHours(1));
+
+		passwordResetTokenRepository.save(resetToken);
+
+		// TODO: implement send an email to user.getEmail() with activation link. Depends on register flow.
+		// https://frontend/api/v1/auth/reset-password?token=" + rawToken
+	}
+
+	@Transactional
+	public void resetPassword(ResetPasswordRequest request) {
+
+		PasswordResetToken token = passwordResetTokenRepository.findByToken(request.token())
+				.orElseThrow(() -> new InvalidTokenException("Invalid or expired password reset token"));
+
+		if (token.isExpired() || token.isUsed()) {
+			throw new InvalidTokenException("Invalid or expired password reset token");
+		}
+
+		if (!request.newPassword().equals(request.confirmNewPassword())) {
+			throw new IllegalArgumentException("New password and confirmation do not match");
+		}
+
+		User user = token.getUser();
+
+		user.changePassword(passwordEncoder.encode(request.newPassword()));
+		token.setUsedAt(LocalDateTime.now());
+
+		repository.save(user);
+		passwordResetTokenRepository.save(token);
+	}
 
     @Transactional(readOnly = true)
     public boolean validateToken(String token) {
@@ -95,9 +191,10 @@ public class AuthService {
 
             if (user == null) {
                 return false;
-            } else {
-                return jwtService.isTokenValid(token, user);
             }
+
+			return jwtService.isTokenValid(token, user);
+
         } catch (Exception e) {
             return false;
         }

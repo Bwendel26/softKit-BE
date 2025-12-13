@@ -1,79 +1,74 @@
 package com.softKit.softKit_BE.controller;
 
-import com.softKit.softKit_BE.model.dto.LoginRequestDTO;
-import com.softKit.softKit_BE.model.dto.LoginResponseDTO;
-import com.softKit.softKit_BE.model.dto.UserCreateDTO;
-import com.softKit.softKit_BE.model.vo.UserResponseVO;
+import com.softKit.softKit_BE.model.dto.requests.ForgotPasswordRequest;
+import com.softKit.softKit_BE.model.dto.requests.LoginRequest;
+import com.softKit.softKit_BE.model.dto.requests.RegisterRequest;
+import com.softKit.softKit_BE.model.dto.requests.ResetPasswordRequest;
+import com.softKit.softKit_BE.model.dto.responses.LoginResponse;
+import com.softKit.softKit_BE.model.dto.responses.RegisterResponse;
 import com.softKit.softKit_BE.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/api/auth")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO requestDTO, BindingResult result) {
+	public AuthController(AuthService authService) {
+		this.authService = authService;
+	}
 
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(buidErrorResponse(result));
-        }
-
-        try {
-            LoginResponseDTO responseDTO = authService.login(requestDTO);
-            return ResponseEntity.ok(responseDTO);
-        }  catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Invalid credentials");
-            errorResponse.put("errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-        }
+	@PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginrequest) {
+		LoginResponse response = authService.login(loginrequest);
+		return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserCreateDTO  createDTO, BindingResult result) {
-        if(result.hasErrors()) {
-            return ResponseEntity.badRequest().body(buidErrorResponse(result));
-        }
-        try {
-            UserResponseVO responseVO = authService.register(createDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(responseVO);
-        } catch (IllegalArgumentException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Registration failed");
-            errorResponse.put("errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Registration failed");
-            errorResponse.put("errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+		RegisterResponse registerResponse = authService.register(registerRequest);
+		return ResponseEntity.status(HttpStatus.CREATED).body(registerResponse);
     }
 
+	@PostMapping("/refresh-token")
+	public ResponseEntity<LoginResponse> refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+		LoginResponse response = authService.refreshToken(authHeader);
+		return ResponseEntity.ok(response);
+	}
 
-    private Map<String, Object> buidErrorResponse(BindingResult bindingResult) {
+	@PostMapping("/reset-password")
+	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+		authService.resetPassword(request);
+		return ResponseEntity.noContent().build();
+	}
 
-        Map<String, Object> errors = new HashMap<>();
-        bindingResult.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+	@PostMapping("/forgot-password")
+	public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+		authService.forgotPassword(request);
+		return ResponseEntity.noContent().build();
+	}
 
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("message", "Validation error");
-        errorResponse.put("errors", errors);
-        return errorResponse;
-    }
+	@PostMapping("/validate-token")
+	public ResponseEntity<String> validateToken() {
+		// TODO: implement a real flow for validate tokens.
+		return ResponseEntity.ok("ok");
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<String> logout() {
+		// TODO: implement a real flow for blacklist/whitelist tokens.
+		return ResponseEntity.ok("ok");
+	}
+
+	@PostMapping("/verify-email")
+	public ResponseEntity<String> verifyEmail() {
+		// TODO: implement a real flow for verify registered email. Priority, depends on the register flow.
+		return ResponseEntity.ok("ok");
+	}
 
 }
