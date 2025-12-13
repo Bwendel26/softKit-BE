@@ -1,121 +1,105 @@
 package com.softKit.softKit_BE.controller;
 
 
-import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.dto.UserCreateDTO;
-import com.softKit.softKit_BE.model.dto.UserUpdateDTO;
-import com.softKit.softKit_BE.model.vo.UserResponseVO;
-import com.softKit.softKit_BE.model.vo.UserVO;
+import com.softKit.softKit_BE.model.dto.requests.*;
+import com.softKit.softKit_BE.model.dto.responses.UserResponse;
 import com.softKit.softKit_BE.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 
 @RestController
-@RequestMapping("api/users")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@RequestMapping("/api/v1/users")
 public class UserController {
 
-    @Autowired
-    UserService service;
+    private final UserService service;
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserResponseVO> getUserById(@PathVariable Long id) {
-        var userVO = service.getUserById(id);
-        return ResponseEntity.ok(userVO);
-    }
+	public UserController(UserService service) {
+		this.service = service;
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseVO>> getAllUsers() {
-        var users = service.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
+	// ---------- ADMIN / MANAGEMENT ENDPOINTS ----------
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+		UserResponse user = service.getById(id);
+		return ResponseEntity.ok(user);
+	}
 
-    @PostMapping
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateDTO user, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body((buildErrorResponse(bindingResult)));
-        }
-        // e-mail validation
-        if(service.existsByEmail(user.email())) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Validation error: email");
-            errorResponse.put("errors", Map.of("email", "Email already in use!"));
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-        try {
-            UserResponseVO savedUser = service.createUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error creating user");
-            errorResponse.put("errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Page<UserResponse>> getAllUsers(Pageable pageable) {
+		Page<UserResponse> users = service.getAll(pageable);
+		return ResponseEntity.ok(users);
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<?> updateUser(
-            @PathVariable Long id,
-            @Valid @RequestBody UserUpdateDTO user,
-            BindingResult bindingResult)
-    {
-         if (bindingResult.hasErrors()) {
-             return ResponseEntity.badRequest().body((buildErrorResponse(bindingResult)));
-         }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<UserResponse> createUser(
+			@Valid @RequestBody UserCreateRequest userRequest
+	) {
+		UserResponse newUser = service.create(userRequest);
+		return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+	}
 
-        // Verify if user exists
-        if(!service.existsById(id)) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "User not found");
-            errorResponse.put("errors", Map.of("id", "User with id " + id + " does not exist"));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+	public ResponseEntity<UserResponse> updateUser(
+			@PathVariable Long id,
+			@Valid @RequestBody UserUpdateRequest userRequest
+	) {
+		UserResponse updatedUser = service.update(id, userRequest);
+		return ResponseEntity.ok(updatedUser);
+	}
 
-        // Verify if mail has in use
-        if(service.existsByEmailAndIdNot(user.email(), id)) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Validation error: email");
-            errorResponse.put("errors", Map.of("email", "Email already in use!"));
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
+	@PatchMapping("/{id}/status")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<UserResponse> updateUserStatus(
+			@PathVariable Long id,
+			@Valid @RequestBody UpdateUserStatusRequest request
+	) {
+		UserResponse updatedUser = service.updateStatus(id, request);
+		return ResponseEntity.ok(updatedUser);
+	}
 
-        try {
-            UserResponseVO updatedUser = service.updateUser(id, user);
-            return ResponseEntity.ok(updatedUser);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error updating user");
-            errorResponse.put("errors", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
-    }
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+		// soft delete: marca como DELETED (ou INACTIVE, conforme seu enum)
+		service.softDelete(id);
+		return ResponseEntity.noContent().build();
+	}
 
-    private Map<String, Object> buildErrorResponse(BindingResult bindingResult) {
-        Map<String, String> errors = new HashMap<>();
+	// ---------- SELF-SERVICE (USUÁRIO LOGADO) ----------
 
-        bindingResult.getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+	@GetMapping("/me")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<UserResponse> getCurrentUser() {
+		UserResponse me = service.getCurrentUser();
+		return ResponseEntity.ok(me);
+	}
 
-        Map<String, Object> errorResponse = new HashMap<>();
-        errorResponse.put("message", "validation error");
-        errorResponse.put("errors", errors);
+	@PutMapping("/me")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<UserResponse> updateMyProfile(
+			@Valid @RequestBody UserSelfUpdateRequest request
+	) {
+		UserResponse updated = service.updateCurrentUser(request);
+		return ResponseEntity.ok(updated);
+	}
 
-        return errorResponse;
+	@PostMapping("/me/change-password")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Void> changePassword(
+			@Valid @RequestBody ChangePasswordRequest request
+	) {
+		service.changePassword(request);
+		return ResponseEntity.noContent().build();
+	}
 
-    }
 }
