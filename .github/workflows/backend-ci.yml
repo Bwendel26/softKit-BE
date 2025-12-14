@@ -2,22 +2,15 @@ name: Backend CI
 
 on:
   push:
-    branches:
-      - develop
+    branches: [ develop ]
   pull_request:
-    branches:
-      - develop
+    branches: [ develop ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
-
-    defaults:
-      run:
-        working-directory: ./softKit-BE
 
     steps:
       - name: Checkout do código
@@ -38,19 +31,23 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Instalar Dependências
-        run: mvn dependency:resolve
+        run: mvn -f softKit-BE/pom.xml dependency:resolve
 
       - name: Executar Testes com Cobertura
-        run: mvn clean verify -DskipITs
+        run: mvn -f softKit-BE/pom.xml clean verify -DskipITs
+
+      - name: Criar pasta de badges
+        run: mkdir -p .github/badges
 
       - name: Gerar selo (badge) do JaCoCo
         uses: cicirello/jacoco-badge-generator@v2
         with:
           jacoco-csv-file: softKit-BE/target/site/jacoco/jacoco.csv
           generate-branches-badge: true
-          badges-directory: softKit-BE/.github/badges
+          badges-directory: .github/badges
 
       - name: Fazer commit do selo (se houver mudança)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
