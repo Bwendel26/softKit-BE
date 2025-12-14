@@ -4,6 +4,8 @@
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+[![Main CI](https://github.com/Bwendel26/softKit-BE/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/ToriCrux/Blog_PageFlow/actions/workflows/main-ci.yml)
+![JaCoCo Coverage](https://raw.githubusercontent.com/Bwendel26/softKit-BE/develop/.github/badges/jacoco.svg)
 
 API RESTful desenvolvida com Spring Boot para **autenticação JWT** e **gestão de usuários**, organizada em módulos de domínio (`auth` e `user`) com uma arquitetura DDD-friendly.
 
