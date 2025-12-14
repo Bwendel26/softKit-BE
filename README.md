@@ -692,18 +692,24 @@ chore: tarefas de build, CI, dependências, etc.
 - [ ] Monitoramento e observabilidade (logs estruturados, métricas)
 - [ ] Cache para endpoints mais acessados (ex.: Redis)
 
-- GitHub: 
-    [@Bwendel](https://github.com/Bwendel26/)
-    [@FranciscoCamellon](https://github.com/franciscocamellon)
-          
-- LinkedIn: 
-    [@Bwendel](https://www.linkedin.com/in/brunowfcdev/)
-    [@FranciscoCamellon](https://www.linkedin.com/in/franciscocamellon/)
+---
+
+## ✨ Autores
+
+**Bruno Fernandes**
+
+- GitHub: [@Bwendel](https://github.com/Bwendel26/)
+- LinkedIn: [Bruno Fernandes](https://linkedin.com/in/seu-perfil)
+
+**Francisco Camello**
+
+- GitHub: [@FranciscoCamellon](https://github.com/franciscocamellon)
+- LinkedIn: [Francisco Camello](https://www.linkedin.com/in/franciscocamellon/)
+
+---
 
 ## 📄 Licença
 
 Este projeto está sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
-
----
 
 Se este projeto te ajudou, considere deixar uma ⭐ no repositório 🙂
