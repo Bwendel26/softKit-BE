@@ -2,16 +2,19 @@
 
 ![Java](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-blue)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-API RESTful desenvolvida com Spring Boot para gerenciamento de usuários e autenticação JWT.
+API RESTful desenvolvida com Spring Boot para **autenticação JWT** e **gestão de usuários**, organizada em módulos de domínio (`auth` e `user`) com uma arquitetura DDD-friendly.
+
+---
 
 ## 📋 Índice
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
 - [Arquitetura](#arquitetura)
+- [Domínios e Casos de Uso](#domínios-e-casos-de-uso)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
 - [Configuração](#configuração)
@@ -20,72 +23,134 @@ API RESTful desenvolvida com Spring Boot para gerenciamento de usuários e auten
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Migrações do Banco de Dados](#migrações-do-banco-de-dados)
 - [Docker](#docker)
+- [Segurança](#segurança)
+- [Testes](#testes)
 - [Contribuindo](#contribuindo)
+- [Roadmap](#roadmap)
 - [Licença](#licença)
+
+---
 
 ## 🎯 Sobre o Projeto
 
-SoftKit é uma aplicação backend robusta que fornece:
+SoftKit é um backend focado em **segurança** e **gestão de usuários**, com:
 
-- Sistema completo de autenticação e autorização com JWT
-- Gerenciamento de usuários com diferentes perfis (ADMIN e CUSTOMER)
-- Validação de dados com Bean Validation
-- Migrações de banco de dados com Flyway
-- Segurança com Spring Security
-- Mapeamento de objetos com MapStruct
+- Autenticação e autorização **stateless** via JWT
+- Gestão de usuários com papéis (`ADMIN`, `CUSTOMER`) e status (`PENDING`, `ACTIVE`, `DISABLED`)
+- Bloqueio de conta por tentativas falhas de login
+- Infraestrutura para recuperação de senha via **tokens de reset**
+- Migrações versionadas com Flyway (PostgreSQL)
+- Organização do código em **módulos de domínio** (`auth`, `user`) para facilitar evolução e futura extração para microserviços
+
+---
 
 ## 🚀 Tecnologias Utilizadas
 
 ### Core
-- **Java 21** - Linguagem de programação
-- **Spring Boot 3.5.4** - Framework principal
-- **Maven** - Gerenciamento de dependências
+
+- **Java 21**
+- **Spring Boot 3.5.4**
+- **Maven** (build e dependências)
 
 ### Banco de Dados
-- **MySQL 8.0** - Banco de dados relacional
-- **Flyway** - Controle de versão do banco de dados
-- **Spring Data JPA** - Abstração de acesso a dados
-- **Hibernate** - ORM
+
+- **PostgreSQL 14+**
+- **Flyway** (migrações)
+- **Spring Data JPA**
+- **Hibernate**
 
 ### Segurança
-- **Spring Security** - Framework de segurança
-- **JWT (JSON Web Token)** - Autenticação stateless
-- **BCrypt** - Criptografia de senhas
+
+- **Spring Security**
+- **JWT (JSON Web Token)** – autenticação stateless
+- **BCrypt** – hashing de senhas
+- Bloqueio de conta por tentativas consecutivas inválidas
 
 ### Outras Bibliotecas
-- **MapStruct 1.5.5** - Mapeamento de objetos (DTO ↔ Entity)
-- **Bean Validation** - Validação de dados
-- **Lombok** (recomendado adicionar) - Redução de boilerplate
+
+- **MapStruct** – mapeamento entre Entities e DTOs
+- **Bean Validation (Jakarta Validation)** – validação de campos
+- **springdoc-openapi** (ou equivalente) – documentação Swagger/OpenAPI (quando configurado)
+
+---
 
 ## 🏗️ Arquitetura
 
-O projeto segue uma arquitetura em camadas:
+O projeto segue um estilo **DDD-friendly com vertical slices por domínio**, em vez de camadas puramente técnicas:
 
-```
+```text
 ┌─────────────────────────────────────┐
-│         Controllers                 │  ← Endpoints REST
+│           HTTP / Controllers       │  ← auth.api / user.api
 ├─────────────────────────────────────┤
-│         Services                    │  ← Lógica de negócio
+│      Application / Use Cases       │  ← auth.application / user.application
 ├─────────────────────────────────────┤
-│         Repositories                │  ← Acesso a dados
+│             Domain                 │  ← Entidades, regras de negócio
 ├─────────────────────────────────────┤
-│         Database (MySQL)            │  ← Persistência
+│        Infrastructure / JPA        │  ← Repositórios, mappers, JWT, DB
 └─────────────────────────────────────┘
 ```
 
-**Padrões Utilizados:**
-- DTO (Data Transfer Object)
-- VO (Value Object)
-- Repository Pattern
-- Dependency Injection
-- Builder Pattern (via MapStruct)
+### Módulos principais
+
+- `auth`
+    - Autenticação (login, registro, refresh token)
+    - Fluxo de recuperação de senha (forgot/reset)
+    - Emissão e validação de JWT
+- `user`
+    - CRUD de usuários
+    - Atualização de dados
+    - Troca de senha (usuário autenticado)
+    - Atualização de status (ADMIN)
+
+- `config`
+    - Segurança (Spring Security + JWT filter)
+    - Configurações de CORS, web, OpenAPI
+    - Handlers de autenticação/autorização
+
+- `exception`
+    - Exceções de domínio e técnicas
+    - `GlobalExceptionHandler` com resposta padronizada de erro
+
+---
+
+## 🧩 Domínios e Casos de Uso
+
+### Auth
+
+- `POST /api/v1/auth/login`  
+  Autenticação com email + senha, retorno de JWT e tempo de expiração.
+
+- `POST /api/v1/auth/register`  
+  Registro de novo usuário (perfil padrão `CUSTOMER`).
+
+- `POST /api/v1/auth/forgot-password` *(infra pronta via `PasswordResetToken`)*  
+  Geração de token de reset de senha (fluxo de envio de e-mail pode ser plugado).
+
+- `POST /api/v1/auth/reset-password`  
+  Reset de senha com base em token válido/não expirado.
+
+- `POST /api/v1/auth/refresh-token`  
+  Endpoint previsto para renovação de token (conforme estratégia adotada).
+
+### User
+
+- `GET /api/v1/users/{id}`
+- `GET /api/v1/users` (lista, paginável futuramente)
+- `POST /api/v1/users` (ADMIN cria usuário)
+- `PUT /api/v1/users/{id}` (ADMIN ou o próprio usuário, conforme regra de `@PreAuthorize`)
+- `PATCH /api/v1/users/{id}/status` (ADMIN atualiza status)
+- `POST /api/v1/users/change-password` (usuário autenticado troca sua senha atual)
+
+---
 
 ## 📋 Pré-requisitos
 
-- Java 21 ou superior
-- Maven 3.9+
-- MySQL 8.0+
-- Docker e Docker Compose (opcional)
+- **Java 21**
+- **Maven 3.9+**
+- **PostgreSQL 14+**
+- Docker / Docker Compose (opcional, para subir stack completa)
+
+---
 
 ## 🔧 Instalação
 
@@ -96,25 +161,34 @@ git clone https://github.com/seu-usuario/softKit-BE.git
 cd softKit-BE
 ```
 
-### 2. Configure o banco de dados
-
-Crie um banco de dados MySQL:
+### 2. Crie o banco de dados PostgreSQL
 
 ```sql
-CREATE DATABASE softkit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE authentication_db;
+```
+
+Opcionalmente, definir usuário/senha específicos:
+
+```sql
+CREATE USER softkit_user WITH ENCRYPTED PASSWORD 'softkit_pass';
+GRANT ALL PRIVILEGES ON DATABASE authentication_db TO softkit_user;
 ```
 
 ### 3. Configure as variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto (ou configure no `application.yml`):
+Crie um arquivo `.env` na raiz (ou use variáveis de ambiente do sistema):
 
 ```properties
-DB_URL=jdbc:mysql://localhost:3306/softkit
-DB_USERNAME=root
-DB_PASSWORD=root
-JWT_SECRET=your-secret-key-here-minimum-256-bits
-JWT_EXPIRATION=3600000
+DB_URL=jdbc:postgresql://localhost:5433/authentication_db
+DB_USERNAME=softkit_user
+DB_PASSWORD=softkit_pass
+
+# JWT secret deve ser uma chave Base64 com pelo menos 32 bytes decodificados
+JWT_SECRET=BASE64_ENCODED_SECRET_HERE
+JWT_EXPIRATION_MS=3600000
 ```
+
+> ⚠️ O `JwtService` valida o tamanho mínimo do secret. Use uma chave forte e Base64 válida.
 
 ### 4. Instale as dependências
 
@@ -122,11 +196,11 @@ JWT_EXPIRATION=3600000
 ./mvnw clean install
 ```
 
+---
+
 ## ⚙️ Configuração
 
-### application.yml
-
-O arquivo de configuração principal está em `src/main/resources/application.yml`:
+Arquivo principal: `src/main/resources/application.yml`
 
 ```yaml
 server:
@@ -134,18 +208,29 @@ server:
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3306/softkit}
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:root}
-  
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/authentication_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
 
   flyway:
     enabled: true
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/authentication_db}
     baseline-on-migrate: true
+    validate-on-migrate: true
+    out-of-order: false
+    locations: classpath:db/migration
 
 cors:
   allowed-origins:
@@ -155,10 +240,17 @@ cors:
     - GET
     - POST
     - PUT
-    - DELETE
     - PATCH
+    - DELETE
     - OPTIONS
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:3600000}
 ```
+
+---
 
 ## 🎮 Executando o Projeto
 
@@ -168,17 +260,16 @@ cors:
 ./mvnw spring-boot:run
 ```
 
-A aplicação estará disponível em: `http://localhost:8080`
+A API ficará disponível em: `http://localhost:8080`
 
 ### Com Docker Compose
 
+Se houver um `docker-compose.yml` configurando app + PostgreSQL:
+
 ```bash
 docker-compose up -d
+docker-compose logs -f
 ```
-
-Isso iniciará:
-- Aplicação Spring Boot na porta 8080
-- MySQL na porta 3306
 
 Para parar:
 
@@ -186,142 +277,238 @@ Para parar:
 docker-compose down
 ```
 
+---
+
 ## 📚 Endpoints da API
 
-### Autenticação
+### Autenticação (`/api/v1/auth`)
 
 #### Login
+
 ```http
-POST /api/auth/login
+POST /api/v1/auth/login
 Content-Type: application/json
 
 {
   "email": "user@email.com",
-  "password": "password123"
+  "password": "SenhaFort3!"
 }
 ```
 
 **Resposta:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "tokenType": "Bearer",
-  "expiresIn": 3600000
+  "expiresIn": 3600000,
+  "user": {
+    "id": 1,
+    "fullName": "User Name",
+    "email": "user@email.com",
+    "role": "CUSTOMER",
+    "status": "ACTIVE",
+    "createdAt": "2025-01-01T12:00:00"
+  }
 }
 ```
 
 #### Registro
+
 ```http
-POST /api/auth/register
+POST /api/v1/auth/register
 Content-Type: application/json
 
 {
   "fullName": "João Silva",
-  "username": "joao.silva",
   "email": "joao@email.com",
-  "phone": "(11) 98765-4321",
-  "password": "Senha123!"
+  "phoneE164": "+5511999999999",
+  "password": "SenhaFort3!"
 }
 ```
 
-### Usuários
+**Resposta (201 Created):**
 
-#### Buscar usuário por ID
+```json
+{
+  "id": 2,
+  "fullName": "João Silva",
+  "email": "joao@email.com",
+  "phoneE164": "+5511999999999",
+  "createdAt": "2025-01-01T12:00:00",
+  "updatedAt": "2025-01-01T12:00:00"
+}
+```
+
+*(Endpoints `forgot-password`, `reset-password` e `refresh-token` podem variar conforme implementação final; consulte a documentação Swagger/OpenAPI gerada pela aplicação.)*
+
+---
+
+### Usuários (`/api/v1/users`)
+
+> Todos os endpoints abaixo requerem `Authorization: Bearer {token}` válido.
+
+#### Buscar usuário por ID (ADMIN)
+
 ```http
-GET /api/users/{id}
+GET /api/v1/users/{id}
 Authorization: Bearer {token}
 ```
 
-**Requisitos:** Perfil ADMIN
+#### Listar usuários (ADMIN)
 
-#### Criar usuário
 ```http
-POST /api/users
+GET /api/v1/users
+Authorization: Bearer {token}
+```
+
+*(Paginação pode ser adicionada futuramente via `?page=0&size=20`)*
+
+#### Criar usuário (ADMIN)
+
+```http
+POST /api/v1/users
 Authorization: Bearer {token}
 Content-Type: application/json
 
 {
   "fullName": "Maria Santos",
-  "username": "maria.santos",
   "email": "maria@email.com",
-  "phone": "(21) 99876-5432",
-  "password": "Senha123!"
+  "phoneE164": "+5521999999999",
+  "password": "SenhaFort3!"
 }
 ```
 
-#### Atualizar usuário
+#### Atualizar usuário (ADMIN ou o próprio usuário)
+
 ```http
-PUT /api/users/{id}
+PUT /api/v1/users/{id}
 Authorization: Bearer {token}
 Content-Type: application/json
 
 {
   "fullName": "Maria Santos Silva",
   "email": "maria.silva@email.com",
-  "phone": "(21) 99999-9999"
+  "phoneE164": "+5521999888877"
 }
 ```
 
-**Requisitos:** Perfil ADMIN ou ser o próprio usuário
+#### Trocar senha (usuário autenticado)
+
+```http
+POST /api/v1/users/change-password
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "password": "SenhaAntiga1",
+  "newPassword": "SenhaNova1",
+  "confirmNewPassword": "SenhaNova1"
+}
+```
+
+---
 
 ## 📁 Estrutura do Projeto
 
-```
+```text
 src/
 ├── main/
 │   ├── java/com/softKit/softKit_BE/
-│   │   ├── config/              # Configurações (Security, CORS, JWT)
-│   │   │   ├── CorsProperties.java
-│   │   │   ├── JwtAuthenticationFilter.java
-│   │   │   ├── SecurityConfig.java
-│   │   │   └── WebConfig.java
-│   │   ├── controller/          # Controllers REST
-│   │   │   └── UserController.java
-│   │   ├── exception/           # Exceções customizadas
-│   │   │   ├── InvalidJwtAuthenticationException.java
-│   │   │   └── handler/
-│   │   ├── model/               # Entidades, DTOs, VOs
-│   │   │   ├── User.java
-│   │   │   ├── Enums/
+│   │   ├── SoftKitBeApplication.java
+│   │   ├── config/
+│   │   │   ├── OpenApiConfig.java          # Configuração Swagger/OpenAPI
+│   │   │   ├── security/
+│   │   │   │   ├── SecurityConfig.java     # Spring Security + JWT filter chain
+│   │   │   │   └── WebConfig.java          # CORS, configurações web
+│   │   │   ├── jwt/
+│   │   │   │   ├── JwtAuthenticationFilter.java
+│   │   │   │   └── JwtProperties.java
+│   │   │   └── exception/
+│   │   │       ├── RestAuthenticationEntryPoint.java
+│   │   │       └── RestAccessDeniedHandler.java
+│   │   ├── auth/
+│   │   │   ├── api/
+│   │   │   │   ├── AuthController.java
+│   │   │   │   └── dto/                    # LoginRequest, LoginResponse, RegisterRequest, etc.
+│   │   │   ├── application/
+│   │   │   │   ├── AuthService.java
+│   │   │   │   └── JwtService.java
+│   │   │   ├── domain/
+│   │   │   │   ├── PasswordResetToken.java
+│   │   │   │   └── mapper/
+│   │   │   │       └── AuthMapper.java
+│   │   │   └── infrastructure/
+│   │   │       └── PasswordResetTokenRepository.java
+│   │   ├── user/
+│   │   │   ├── api/
+│   │   │   │   ├── UserController.java
+│   │   │   │   └── dto/                    # UserCreateRequest, UserUpdateRequest, UserResponse, etc.
+│   │   │   ├── application/
+│   │   │   │   └── UserService.java
+│   │   │   ├── domain/
+│   │   │   │   ├── User.java
+│   │   │   │   ├── Role.java
+│   │   │   │   ├── Status.java
+│   │   │   │   └── mapper/
+│   │   │   │       └── UserMapper.java
+│   │   ├── exception/
 │   │   │   ├── dto/
-│   │   │   │   ├── UserCreateDTO.java
-│   │   │   │   ├── UserUpdateDTO.java
-│   │   │   │   ├── LoginRequestDTO.java
-│   │   │   │   └── LoginResponseDTO.java
-│   │   │   ├── vo/
-│   │   │   │   └── UserResponseVO.java
-│   │   │   └── mapper/
-│   │   │       └── UserMapper.java (MapStruct)
-│   │   ├── repository/          # Repositórios JPA
-│   │   │   └── UserRepository.java
-│   │   ├── service/             # Lógica de negócio
-│   │   │   ├── UserService.java
-│   │   │   └── JwtService.java
-│   │   └── SoftKitBeApplication.java
+│   │   │   │   └── ErrorResponse.java
+│   │   │   ├── GlobalExceptionHandler.java
+│   │   │   ├── EmailAlreadyInUseException.java
+│   │   │   ├── UserNotFoundException.java
+│   │   │   ├── InvalidJwtAuthenticationException.java
+│   │   │   └── InvalidTokenException.java
 │   └── resources/
-│       ├── application.yml      # Configurações da aplicação
-│       └── db/migration/        # Migrações Flyway
-│           └── V1__create_users_table.sql
-└── test/                        # Testes unitários e integração
+│       ├── application.yml
+│       └── db/migration/
+│           └── V1__init_users_and_password_reset_tokens.sql
+└── test/
+    └── java/com/softKit/softKit_BE/
+        ├── auth/   # Testes de AuthController/AuthService/JwtService
+        ├── user/   # Testes de UserController/UserService
+        └── config/ # TestSecurityConfig, etc.
 ```
+
+---
 
 ## 🗃️ Migrações do Banco de Dados
 
-O projeto utiliza Flyway para versionamento do banco de dados.
+O projeto utiliza **Flyway** para controlar a evolução do schema.
 
-### Estrutura da tabela Users
+### Migração inicial (`V1__init_users_and_password_reset_tokens.sql`)
+
+Exemplo simplificado do schema (PostgreSQL):
 
 ```sql
 CREATE TABLE users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     full_name VARCHAR(200) NOT NULL,
-    username VARCHAR(150) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    profile ENUM('CUSTOMER', 'ADMIN') NOT NULL,
-    phone VARCHAR(20),
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL
+    email_verified_at TIMESTAMP(3),
+    password_hash VARCHAR(255) NOT NULL,
+    phone_e164 VARCHAR(20),
+    role VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    failed_login_attempts INTEGER NOT NULL DEFAULT 0 CHECK (failed_login_attempts >= 0),
+    locked_until TIMESTAMP(3),
+    last_login_at TIMESTAMP(3),
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    updated_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    CONSTRAINT chk_users_role CHECK (role IN ('CUSTOMER', 'ADMIN')),
+    CONSTRAINT chk_users_status CHECK (status IN ('PENDING', 'ACTIVE', 'DISABLED'))
+);
+
+CREATE TABLE password_reset_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token VARCHAR(100) NOT NULL UNIQUE,
+    user_id BIGINT NOT NULL,
+    expires_at TIMESTAMP(3) NOT NULL,
+    used_at TIMESTAMP(3),
+    created_at TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    CONSTRAINT fk_password_reset_tokens_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 ```
 ### DUMP de dados pra testes locais
@@ -386,17 +573,17 @@ ADMIN,carla.fernandes@email.com,123456
 CUSTOMER,ana.silva@email.com,123456
 ## ❗Note que todos os usuários, independentemente do perfil, usam a mesma senha de hash. A senha em texto simples correspondente ao hash $2a$10$N9qo8uLOickgx2ZMRZoMye1J8Rm/C2AVqVOCSmL7mqyXyJRv0qXUa é 123456.
 
-### Criar nova migração
+Para criar novas migrações:
 
-1. Crie um arquivo em `src/main/resources/db/migration/`
-2. Siga o padrão: `V{version}__{description}.sql`
-   - Exemplo: `V2__add_user_status_column.sql`
+1. Criar um arquivo em `src/main/resources/db/migration/`
+2. Seguir o padrão: `V{versão}__{descrição}.sql`  
+   Ex.: `V2__add_audit_logs_table.sql`
+
+---
 
 ## 🐳 Docker
 
-### Dockerfile
-
-O projeto inclui um Dockerfile multi-stage para build otimizado:
+### Dockerfile (multi-stage)
 
 ```dockerfile
 # Build stage
@@ -415,42 +602,47 @@ EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
-### Comandos úteis
+Comandos úteis:
 
 ```bash
 # Build da imagem
 docker build -t softkit-be .
 
-# Executar container
-docker run -p 8080:8080 softkit-be
-
-# Com Docker Compose
-docker-compose up -d
-docker-compose logs -f
-docker-compose down
+# Rodar container
+docker run -p 8080:8080 --env-file .env softkit-be
 ```
+
+---
 
 ## 🔒 Segurança
 
 ### Senhas
 
-- Todas as senhas são criptografadas com BCrypt
-- Requisitos mínimos de senha:
-  - Mínimo 8 caracteres
-  - Pelo menos 1 letra maiúscula
-  - Pelo menos 1 letra minúscula
-  - Pelo menos 1 número
+- Hash com **BCrypt**
+- Regras de senha (padrão):
+    - Mínimo 8 caracteres
+    - Pelo menos 1 letra maiúscula
+    - Pelo menos 1 letra minúscula
+    - Pelo menos 1 dígito numérico
 
 ### JWT
 
-- Tokens JWT para autenticação stateless
-- Expiração configurável (padrão: 1 hora)
-- Tokens incluem roles do usuário
+- Tokens assinados com chave HMAC (HS256)
+- Chave secreta **Base64** com tamanho mínimo validado pelo `JwtService`
+- Tempo de expiração configurável (`security.jwt.expiration-ms`)
+- Inclusão de roles nas claims (`roles`)
 
-### Perfis de Acesso
+### Perfis e Status
 
-- **ADMIN**: Acesso completo ao sistema
-- **CUSTOMER**: Acesso limitado aos próprios dados
+- **Roles**:
+    - `ADMIN`: acesso administrativo
+    - `CUSTOMER`: usuário final
+- **Status**:
+    - `PENDING` → conta criada, ainda não ativada
+    - `ACTIVE` → conta ativa
+    - `DISABLED` → acesso bloqueado
+
+---
 
 ## 🧪 Testes
 
@@ -458,77 +650,60 @@ docker-compose down
 # Executar todos os testes
 ./mvnw test
 
-# Executar com cobertura
+# Executar com relatório de cobertura (JaCoCo)
 ./mvnw test jacoco:report
 ```
 
-## 📝 Validações
+O objetivo é manter **cobertura mínima de 80%**, com foco em:
 
-O projeto utiliza Bean Validation (Jakarta Validation) para validar dados:
-
-### UserCreateDTO
-- `fullName`: Obrigatório, máximo 200 caracteres
-- `username`: Obrigatório, máximo 150 caracteres
-- `email`: Obrigatório, formato email válido, máximo 150 caracteres
-- `password`: Obrigatório, mínimo 8 caracteres, deve conter letra maiúscula, minúscula e número
-- `phone`: Opcional, máximo 20 caracteres
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-### Padrões de Commit
-
-```
-feat: adiciona nova funcionalidade
-fix: corrige bug
-docs: atualiza documentação
-style: formatação, sem mudança de código
-refactor: refatoração de código
-test: adiciona ou corrige testes
-chore: atualizações de build, dependências, etc
-```
-
-## 🐛 Problemas Conhecidos
-
-- [ ] JWT Secret key deve ser movido para variáveis de ambiente
-- [ ] Implementar refresh token
-- [ ] Adicionar paginação nos endpoints de listagem
-- [ ] Implementar testes de integração
-- [ ] Adicionar Swagger/OpenAPI documentation
-
-## 🗺️ Roadmap
-
-- [ ] Implementar sistema de recuperação de senha
-- [ ] Adicionar autenticação OAuth2
-- [ ] Implementar sistema de logs
-- [ ] Adicionar cache com Redis
-- [ ] Criar endpoints de relatórios
-- [ ] Implementar websockets para notificações em tempo real
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## ✨ Autor
-
-**Bruno Fernandes**
-
-- GitHub: [@Bwendel](https://github.com/Bwendel26/)
-- LinkedIn: [LinkedIn](https://www.linkedin.com/in/brunowfcdev/)
-
-## 🙏 Agradecimentos
-
-- Spring Team pela excelente documentação
-- Comunidade Java/Spring Boot
-- Todos os contribuidores do projeto
+- `AuthService`, `UserService`, `JwtService`
+- `AuthController`, `UserController`
+- `GlobalExceptionHandler`
 
 ---
 
-⭐️ Se este projeto foi útil para você, considere dar uma estrela!
+## 🤝 Contribuindo
 
-**Feito com ☕ por Bruno Fernandes**
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/minha-feature`)
+3. Commit suas alterações (`git commit -m 'feat: adiciona minha-feature'`)
+4. Envie para o repositório remoto (`git push origin feature/minha-feature`)
+5. Abra um Pull Request
+
+### Padrão de commits (sugestão)
+
+```text
+feat: adiciona nova funcionalidade
+fix: corrige bug
+docs: atualiza documentação
+refactor: refatoração interna de código
+test: adiciona ou ajusta testes
+chore: tarefas de build, CI, dependências, etc.
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Implementar fluxo completo de refresh token
+- [ ] Completar fluxo de recuperação de senha (integração com e-mail)
+- [ ] Paginação e filtros em `/api/v1/users`
+- [ ] Testes de integração com banco em memória / Testcontainers
+- [ ] Monitoramento e observabilidade (logs estruturados, métricas)
+- [ ] Cache para endpoints mais acessados (ex.: Redis)
+
+- GitHub: 
+    [@Bwendel](https://github.com/Bwendel26/)
+    [@FranciscoCamellon](https://github.com/franciscocamellon)
+          
+- LinkedIn: 
+    [@Bwendel](https://www.linkedin.com/in/brunowfcdev/)
+    [@FranciscoCamellon](https://www.linkedin.com/in/franciscocamellon/)
+
+## 📄 Licença
+
+Este projeto está sob a licença **MIT**. Consulte o arquivo `LICENSE` para mais detalhes.
+
+---
+
+Se este projeto te ajudou, considere deixar uma ⭐ no repositório 🙂

@@ -1,0 +1,130 @@
+package com.softKit.softKit_BE.auth.api;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.softKit.softKit_BE.TestSecurityConfig;
+import com.softKit.softKit_BE.auth.api.dto.LoginRequest;
+import com.softKit.softKit_BE.auth.api.dto.RegisterRequest;
+import com.softKit.softKit_BE.auth.api.dto.LoginResponse;
+import com.softKit.softKit_BE.auth.api.dto.RegisterResponse;
+import com.softKit.softKit_BE.shared.exception.EmailAlreadyInUseException;
+import com.softKit.softKit_BE.user.api.dto.UserResponse;
+import com.softKit.softKit_BE.user.domain.enums.Role;
+import com.softKit.softKit_BE.user.domain.enums.Status;
+import com.softKit.softKit_BE.auth.application.AuthService;
+import com.softKit.softKit_BE.auth.application.JwtService;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(controllers = AuthController.class)
+@Import(TestSecurityConfig.class)
+class AuthControllerTest {
+
+	@Autowired
+	private MockMvc mockMvc;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@MockitoBean
+	private AuthService authService;
+
+	@MockitoBean
+	private JwtService jwtService;
+
+	@Test
+	void login_shouldReturnOkAndBody() throws Exception {
+
+		LoginRequest request = new LoginRequest("john@example.com", "Password123");
+
+		UserResponse userResponse = new UserResponse(
+				UUID.randomUUID(), "John Doe", "john@example.com", null,
+				Role.CUSTOMER, Status.ACTIVE, null, null,
+				OffsetDateTime.now(), OffsetDateTime.now()
+		);
+		LoginResponse loginResponse = new LoginResponse(
+				"jwt-token", "Bearer", 3600000L, userResponse
+		);
+
+		Mockito.when(authService.login(any(LoginRequest.class)))
+				.thenReturn(loginResponse);
+
+		mockMvc.perform(post("/api/v1/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isOk())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.token").value("jwt-token"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.tokenType").value("Bearer"))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.user.email").value("john@example.com"));
+	}
+
+	@Test
+	void login_shouldReturnUnauthorized_whenBadCredentials() throws Exception {
+		LoginRequest request = new LoginRequest("john@example.com", "wrong");
+
+		when(authService.login(any(LoginRequest.class)))
+				.thenThrow(new BadCredentialsException("Invalid username or password"));
+
+		mockMvc.perform(post("/api/v1/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isUnauthorized())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Invalid credentials"));
+	}
+
+	@Test
+	void register_shouldReturnConflict_whenEmailAlreadyInUse() throws Exception {
+		RegisterRequest request = new RegisterRequest(
+				"John Doe",
+				"john@example.com",
+				"+5511999999999",
+				"Password1"
+		);
+
+		when(authService.register(any(RegisterRequest.class)))
+				.thenThrow(new EmailAlreadyInUseException("Email already in use"));
+
+		mockMvc.perform(post("/api/v1/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isConflict())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Email already in use"));
+	}
+
+	@Test
+	void register_shouldReturnCreated() throws Exception {
+		RegisterRequest request = new RegisterRequest(
+				"John Doe", "john@example.com", "+5511999999999", "Password123"
+		);
+
+		RegisterResponse response = new RegisterResponse(
+				UUID.randomUUID(), "John Doe", "john@example.com",
+				"+5511999999999", OffsetDateTime.now(), OffsetDateTime.now()
+		);
+
+		when(authService.register(any(RegisterRequest.class)))
+				.thenReturn(response);
+
+		mockMvc.perform(post("/api/v1/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(request)))
+				.andExpect(status().isCreated())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.email").value("john@example.com"));
+	}
+}
