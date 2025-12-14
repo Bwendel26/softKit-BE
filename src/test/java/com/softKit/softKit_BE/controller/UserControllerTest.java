@@ -24,7 +24,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -51,14 +53,14 @@ class UserControllerTest {
 	@WithMockUser(roles = "ADMIN")
 	void getAllUsers_shouldReturnPagedList_forAdmin() throws Exception {
 		UserResponse user1 = new UserResponse(
-				1L, "John Doe", "john@example.com",
+				UUID.randomUUID(), "John Doe", "john@example.com",
 				null, Role.CUSTOMER, Status.ACTIVE,
-				null, null, LocalDateTime.now(), LocalDateTime.now()
+				null, null, OffsetDateTime.now(), OffsetDateTime.now()
 		);
 		UserResponse user2 = new UserResponse(
-				2L, "Jane Doe", "jane@example.com",
+				UUID.randomUUID(), "Jane Doe", "jane@example.com",
 				null, Role.ADMIN, Status.ACTIVE,
-				null, null, LocalDateTime.now(), LocalDateTime.now()
+				null, null, OffsetDateTime.now(), OffsetDateTime.now()
 		);
 
 		Pageable pageable = PageRequest.of(0, 10);
@@ -83,9 +85,9 @@ class UserControllerTest {
 		);
 
 		UserResponse response = new UserResponse(
-				1L, "John Doe", "john@example.com",
+				UUID.randomUUID(), "John Doe", "john@example.com",
 				"+5511999999999", Role.CUSTOMER, Status.ACTIVE,
-				null, null, LocalDateTime.now(), LocalDateTime.now()
+				null, null, OffsetDateTime.now(), OffsetDateTime.now()
 		);
 
 		when(userService.create(any(UserCreateRequest.class)))
@@ -106,13 +108,14 @@ class UserControllerTest {
 				"John Doe Updated", "john@example.com", "+5511999999999"
 		);
 
+		UUID userId = UUID.randomUUID();
 		UserResponse response = new UserResponse(
-				1L, "John Doe Updated", "john@example.com",
+				userId, "John Doe Updated", "john@example.com",
 				"+5511999999999", Role.CUSTOMER, Status.ACTIVE,
-				null, null, LocalDateTime.now(), LocalDateTime.now()
+				null, null, OffsetDateTime.now(), OffsetDateTime.now()
 		);
 
-		when(userService.update(eq(1L), any(UserUpdateRequest.class)))
+		when(userService.update(eq(userId), any(UserUpdateRequest.class)))
 				.thenReturn(response);
 
 		mockMvc.perform(put("/api/v1/users/{id}", 1L)

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -26,7 +28,7 @@ public class UserController {
 	// ---------- ADMIN / MANAGEMENT ENDPOINTS ----------
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+	public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
 		UserResponse user = service.getById(id);
 		return ResponseEntity.ok(user);
 	}
@@ -50,7 +52,7 @@ public class UserController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
 	public ResponseEntity<UserResponse> updateUser(
-			@PathVariable Long id,
+			@PathVariable UUID id,
 			@Valid @RequestBody UserUpdateRequest userRequest
 	) {
 		UserResponse updatedUser = service.update(id, userRequest);
@@ -60,7 +62,7 @@ public class UserController {
 	@PatchMapping("/{id}/status")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<UserResponse> updateUserStatus(
-			@PathVariable Long id,
+			@PathVariable UUID id,
 			@Valid @RequestBody UpdateUserStatusRequest request
 	) {
 		UserResponse updatedUser = service.updateStatus(id, request);
@@ -69,7 +71,7 @@ public class UserController {
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+	public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
 		// soft delete: marca como DELETED (ou INACTIVE, conforme seu enum)
 		service.softDelete(id);
 		return ResponseEntity.noContent().build();

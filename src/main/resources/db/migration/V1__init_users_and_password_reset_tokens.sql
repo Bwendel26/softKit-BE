@@ -5,12 +5,14 @@
 --   - seed data for authentication tests
 -- =====================================================================
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 -- =======================
 -- USERS TABLE
 -- =======================
 
 CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     full_name VARCHAR(200) NOT NULL,
     email VARCHAR(150) NOT NULL,
     email_verified_at TIMESTAMP(3),
@@ -42,9 +44,9 @@ CREATE INDEX idx_users_status ON users(status);
 -- =======================
 
 CREATE TABLE password_reset_tokens (
-    id BIGSERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     token VARCHAR(100) NOT NULL,
-    user_id BIGINT NOT NULL,
+    user_id UUID NOT NULL,
     expires_at TIMESTAMPTZ(3) NOT NULL,
     used_at TIMESTAMPTZ(3),
     created_at TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

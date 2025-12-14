@@ -24,6 +24,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -53,9 +55,9 @@ class AuthControllerTest {
 		LoginRequest request = new LoginRequest("john@example.com", "Password123");
 
 		UserResponse userResponse = new UserResponse(
-				1L, "John Doe", "john@example.com", null,
+				UUID.randomUUID(), "John Doe", "john@example.com", null,
 				Role.CUSTOMER, Status.ACTIVE, null, null,
-				LocalDateTime.now(), LocalDateTime.now()
+				OffsetDateTime.now(), OffsetDateTime.now()
 		);
 		LoginResponse loginResponse = new LoginResponse(
 				"jwt-token", "Bearer", 3600000L, userResponse
@@ -80,7 +82,7 @@ class AuthControllerTest {
 		);
 
 		RegisterResponse response = new RegisterResponse(
-				1L, "John Doe", "john@example.com",
+				UUID.randomUUID(), "John Doe", "john@example.com",
 				"+5511999999999", LocalDateTime.now(), LocalDateTime.now()
 		);
 

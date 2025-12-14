@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -35,9 +36,11 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserResponse getById(Long id) {
-        User user = repository.findById(id)
+    public UserResponse getById(UUID id) {
+
+        User user = (User) repository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException(id));
+
         return mapper.toUserResponse(user);
     }
 
@@ -69,9 +72,9 @@ public class UserService implements UserDetailsService {
         return mapper.toUserResponse(repository.save(user));
     }
 
-    public UserResponse update(Long id, UserUpdateRequest dto) {
+    public UserResponse update(UUID id, UserUpdateRequest dto) {
 
-		User user = repository.findById(id)
+		User user = (User) repository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException(id));
 
 		if (repository.existsByEmailAndIdNot(dto.email(), id)) {
@@ -83,8 +86,9 @@ public class UserService implements UserDetailsService {
         return mapper.toUserResponse(repository.save(user));
     }
 
-	public UserResponse updateStatus(Long id, UpdateUserStatusRequest request) {
-		User user = repository.findById(id)
+	public UserResponse updateStatus(UUID id, UpdateUserStatusRequest request) {
+
+		User user = (User) repository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException(id));
 
 		user.setStatus(request.status());
@@ -92,8 +96,8 @@ public class UserService implements UserDetailsService {
 		return mapper.toUserResponse(repository.save(user));
 	}
 
-	public void softDelete(Long id) {
-		User user = repository.findById(id)
+	public void softDelete(UUID id) {
+		User user = (User) repository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException(id));
 
 		user.setStatus(Status.DISABLED);

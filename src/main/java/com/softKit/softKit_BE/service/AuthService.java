@@ -24,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -92,7 +92,7 @@ public class AuthService {
         user.setPasswordHash(hashedPassword);
         user.setRole(Role.CUSTOMER); //default profile
 		user.setStatus(Status.ACTIVE); // ou PENDING TODO: verify flow for default user status
-		user.setEmailVerifiedAt(LocalDateTime.now());
+		user.setEmailVerifiedAt(OffsetDateTime.now());
 
         User savedUser = repository.save(user);
 
@@ -152,7 +152,7 @@ public class AuthService {
 		PasswordResetToken resetToken = new PasswordResetToken();
 		resetToken.setToken(rawToken);
 		resetToken.setUser(user);
-		resetToken.setExpiresAt(LocalDateTime.now().plusHours(1));
+		resetToken.setExpiresAt(OffsetDateTime.now().plusHours(1));
 
 		passwordResetTokenRepository.save(resetToken);
 
@@ -177,7 +177,7 @@ public class AuthService {
 		User user = token.getUser();
 
 		user.changePassword(passwordEncoder.encode(request.newPassword()));
-		token.setUsedAt(LocalDateTime.now());
+		token.setUsedAt(OffsetDateTime.now());
 
 		repository.save(user);
 		passwordResetTokenRepository.save(token);

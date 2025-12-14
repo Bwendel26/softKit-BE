@@ -27,8 +27,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -59,11 +61,13 @@ class UserServiceTest {
 		User user = new User("John Doe", "john@example.com", "hashed", Role.CUSTOMER);
 		user.setStatus(Status.ACTIVE);
 
-		when(repository.findById(1L)).thenReturn(Optional.of(user));
+		UUID userId = UUID.randomUUID();
+
+		when(repository.findById(userId)).thenReturn(Optional.of(user));
 		when(mapper.toUserResponse(user)).thenReturn(
-				new UserResponse(1L, "John Doe", "john@example.com", null,
+				new UserResponse(userId, "John Doe", "john@example.com", null,
 						Role.CUSTOMER, Status.ACTIVE, null, null,
-						LocalDateTime.now(), LocalDateTime.now())
+						OffsetDateTime.now(), OffsetDateTime.now())
 		);
 
 		UserResponse response = service.getById(1L);
@@ -92,14 +96,14 @@ class UserServiceTest {
 
 		when(repository.findAll(pageable)).thenReturn(userPage);
 		when(mapper.toUserResponse(user1)).thenReturn(
-				new UserResponse(1L, "John Doe", "john@example.com", null,
+				new UserResponse(UUID.randomUUID(), "John Doe", "john@example.com", null,
 						Role.CUSTOMER, Status.ACTIVE, null, null,
-						LocalDateTime.now(), LocalDateTime.now())
+						OffsetDateTime.now(), OffsetDateTime.now())
 		);
 		when(mapper.toUserResponse(user2)).thenReturn(
-				new UserResponse(2L, "Jane Doe", "jane@example.com", null,
+				new UserResponse(UUID.randomUUID(), "Jane Doe", "jane@example.com", null,
 						Role.ADMIN, Status.ACTIVE, null, null,
-						LocalDateTime.now(), LocalDateTime.now())
+						OffsetDateTime.now(), OffsetDateTime.now())
 		);
 
 		Page<UserResponse> response = service.getAll(pageable);
@@ -125,14 +129,14 @@ class UserServiceTest {
 
 		User savedUser = user;
 		savedUser.setStatus(Status.ACTIVE);
-		savedUser.setEmailVerifiedAt(LocalDateTime.now());
+		savedUser.setEmailVerifiedAt(OffsetDateTime.now());
 		when(repository.save(user)).thenReturn(savedUser);
 
 		when(mapper.toUserResponse(savedUser)).thenReturn(
-				new UserResponse(1L, "John Doe", "john@example.com",
+				new UserResponse(UUID.randomUUID(), "John Doe", "john@example.com",
 						"+5511999999999", Role.CUSTOMER, Status.ACTIVE,
 						savedUser.getEmailVerifiedAt(), null,
-						LocalDateTime.now(), LocalDateTime.now())
+						OffsetDateTime.now(), OffsetDateTime.now())
 		);
 
 		UserResponse response = service.create(request);
@@ -195,9 +199,9 @@ class UserServiceTest {
 		SecurityContextHolder.getContext().setAuthentication(auth);
 
 		when(mapper.toUserResponse(user)).thenReturn(
-				new UserResponse(1L, "John Doe", "john@example.com", null,
+				new UserResponse(UUID.randomUUID(), "John Doe", "john@example.com", null,
 						Role.CUSTOMER, Status.ACTIVE, null, null,
-						LocalDateTime.now(), LocalDateTime.now())
+						OffsetDateTime.now(), OffsetDateTime.now())
 		);
 
 		UserResponse response = service.getCurrentUser();

@@ -4,16 +4,18 @@ import com.softKit.softKit_BE.model.enums.Role;
 import com.softKit.softKit_BE.model.enums.Status;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public record UserResponse(
-		Long id,
+		UUID id,
 		String fullName,
 		String email,
 		String phoneE164,
 		Role role,
 		Status status,
-		LocalDateTime emailVerifiedAt,
-		LocalDateTime lastLoginAt,
-		LocalDateTime createdAt,
-		LocalDateTime updatedAt
+		OffsetDateTime emailVerifiedAt,
+		OffsetDateTime lastLoginAt,
+		OffsetDateTime createdAt,
+		OffsetDateTime updatedAt
 ) {}

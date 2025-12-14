@@ -4,24 +4,26 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.softKit.softKit_BE.model.enums.Role;
 import com.softKit.softKit_BE.model.enums.Status;
 import jakarta.persistence.*;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails, Serializable {
 
-    private static final long serialVersionUID = 4222094939004637717L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(columnDefinition = "uuid")
+	private UUID id;
 
     @Column(name = "full_name", nullable = false, length = 200)
     private String fullName;
@@ -30,7 +32,7 @@ public class User implements UserDetails, Serializable {
     private String email;
 
 	@Column(name = "email_verified_at")
-	private LocalDateTime emailVerifiedAt;
+	private OffsetDateTime emailVerifiedAt;
 
     @Column(name = "phone_e164", length = 20)
     private String phoneE164;
@@ -50,18 +52,18 @@ public class User implements UserDetails, Serializable {
 	private int failedLoginAttempts = 0;
 
 	@Column(name = "locked_until")
-	private LocalDateTime lockedUntil;
+	private OffsetDateTime lockedUntil;
 
 	@Column(name = "last_login_at")
-	private LocalDateTime lastLoginAt;
+	private OffsetDateTime lastLoginAt;
 
 	@JsonIgnore
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @JsonIgnore
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
 
     public User() {}
 
@@ -75,12 +77,12 @@ public class User implements UserDetails, Serializable {
     // Lifecycle
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime.now();
 	}
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = OffsetDateTime.now();
     }
 
     @Override
@@ -105,7 +107,7 @@ public class User implements UserDetails, Serializable {
 
     @Override
     public boolean isAccountNonLocked() {
-		return lockedUntil == null || lockedUntil.isBefore(LocalDateTime.now());
+		return lockedUntil == null || lockedUntil.isBefore(OffsetDateTime.now());
     }
 
     @Override
@@ -118,7 +120,7 @@ public class User implements UserDetails, Serializable {
 		return status == Status.ACTIVE;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
@@ -182,35 +184,35 @@ public class User implements UserDetails, Serializable {
 		this.failedLoginAttempts = failedLoginAttempts;
 	}
 
-	public LocalDateTime getLockedUntil() {
+	public OffsetDateTime getLockedUntil() {
 		return lockedUntil;
 	}
 
-	public void setLockedUntil(LocalDateTime lockedUntil) {
+	public void setLockedUntil(OffsetDateTime lockedUntil) {
 		this.lockedUntil = lockedUntil;
 	}
 
-	public LocalDateTime getLastLoginAt() {
+	public OffsetDateTime getLastLoginAt() {
 		return lastLoginAt;
 	}
 
-	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+	public void setLastLoginAt(OffsetDateTime lastLoginAt) {
 		this.lastLoginAt = lastLoginAt;
 	}
 
-	public LocalDateTime getEmailVerifiedAt() {
+	public OffsetDateTime getEmailVerifiedAt() {
 		return emailVerifiedAt;
 	}
 
-	public void setEmailVerifiedAt(LocalDateTime emailVerifiedAt) {
+	public void setEmailVerifiedAt(OffsetDateTime emailVerifiedAt) {
 		this.emailVerifiedAt = emailVerifiedAt;
 	}
 
-	public LocalDateTime getCreatedAt() {
+	public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public OffsetDateTime getUpdatedAt() {
         return updatedAt;
     }
 
