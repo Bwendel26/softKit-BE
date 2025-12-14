@@ -12,4 +12,5 @@ public record RegisterRequest(
 		@NotBlank @Size(min = 8, max = 255)
 		@Pattern(regexp = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z]).{8,}$",
 				message = "Password must have at least 8 chars, 1 upper, 1 lower, 1 digit")
-		String password) { }
+		String password
+) { }

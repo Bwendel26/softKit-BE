@@ -1,9 +1,11 @@
 package com.softKit.softKit_BE.user.api.dto;
 
+import com.softKit.softKit_BE.shared.validation.PasswordsMatch;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+@PasswordsMatch(message = "New password and confirmation must match")
 public record ChangePasswordRequest(
 
 		@NotBlank
