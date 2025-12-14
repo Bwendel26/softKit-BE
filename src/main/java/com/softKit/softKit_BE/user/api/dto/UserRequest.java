@@ -1,5 +1,6 @@
 package com.softKit.softKit_BE.user.api.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -9,6 +10,7 @@ public record UserRequest(
 		String fullName,
 
 		@NotBlank(message = "Email is required!")
+		@Email(message = "Invalid email format")
 		@Size(max = 150, message = "Email must contain until 150 chars")
 		String email,
 
