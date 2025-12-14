@@ -1,6 +1,6 @@
 package com.softKit.softKit_BE;
 
-import com.softKit.softKit_BE.config.JwtAuthenticationFilter;
+import com.softKit.softKit_BE.shared.config.jwt.JwtAuthenticationFilter;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

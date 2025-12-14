@@ -1,21 +1,17 @@
-package com.softKit.softKit_BE.controller;
-
-import static org.junit.jupiter.api.Assertions.*;
+package com.softKit.softKit_BE.user.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.softKit.softKit_BE.TestSecurityConfig;
-import com.softKit.softKit_BE.model.dto.request.UserCreateRequest;
-import com.softKit.softKit_BE.model.dto.request.UserUpdateRequest;
-import com.softKit.softKit_BE.model.dto.response.UserResponse;
-import com.softKit.softKit_BE.model.enums.Role;
-import com.softKit.softKit_BE.model.enums.Status;
-import com.softKit.softKit_BE.service.JwtService;
-import com.softKit.softKit_BE.service.UserService;
+import com.softKit.softKit_BE.user.api.dto.UserCreateRequest;
+import com.softKit.softKit_BE.user.api.dto.UserUpdateRequest;
+import com.softKit.softKit_BE.user.api.dto.UserResponse;
+import com.softKit.softKit_BE.user.domain.enums.Role;
+import com.softKit.softKit_BE.user.domain.enums.Status;
+import com.softKit.softKit_BE.auth.application.JwtService;
+import com.softKit.softKit_BE.user.application.UserService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
@@ -23,7 +19,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -118,7 +113,7 @@ class UserControllerTest {
 		when(userService.update(eq(userId), any(UserUpdateRequest.class)))
 				.thenReturn(response);
 
-		mockMvc.perform(put("/api/v1/users/{id}", 1L)
+		mockMvc.perform(put("/api/v1/users/{id}", userId)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(request)))
 				.andExpect(status().isOk())

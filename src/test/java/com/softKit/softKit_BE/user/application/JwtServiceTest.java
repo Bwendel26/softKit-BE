@@ -1,12 +1,17 @@
-package com.softKit.softKit_BE.service;
+package com.softKit.softKit_BE.user.application;
 
-import com.softKit.softKit_BE.config.JwtProperties;
-import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.enums.Role;
+import com.softKit.softKit_BE.auth.application.JwtService;
+import com.softKit.softKit_BE.shared.config.jwt.JwtProperties;
+import com.softKit.softKit_BE.user.domain.User;
+import com.softKit.softKit_BE.user.domain.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;;
 
 class JwtServiceTest {
@@ -16,8 +21,10 @@ class JwtServiceTest {
 	@BeforeEach
 	void setUp() {
 		JwtProperties props = new JwtProperties();
-		props.setSecret("super-secret-jwt-key-for-tests-1234567890"); // >32 bytes, cai no branch UTF-8
-		props.setExpirationMs(3600000L); // 1h
+		String secret = "this-is-a-super-secret-key-at-least-32-bytes";
+		String base64Secret = Base64.getEncoder().encodeToString(secret.getBytes(StandardCharsets.UTF_8));
+		props.setSecret(base64Secret);
+		props.setExpirationMs(3600000L);
 
 		jwtService = new JwtService(props);
 	}

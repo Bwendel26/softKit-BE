@@ -1,16 +1,17 @@
-package com.softKit.softKit_BE.service;
+package com.softKit.softKit_BE.auth.application;
 
-import com.softKit.softKit_BE.exception.EmailAlreadyInUseException;
-import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.dto.request.LoginRequest;
-import com.softKit.softKit_BE.model.dto.request.RegisterRequest;
-import com.softKit.softKit_BE.model.dto.response.LoginResponse;
-import com.softKit.softKit_BE.model.dto.response.RegisterResponse;
-import com.softKit.softKit_BE.model.dto.response.UserResponse;
-import com.softKit.softKit_BE.model.enums.Role;
-import com.softKit.softKit_BE.model.enums.Status;
-import com.softKit.softKit_BE.model.mapper.UserMapper;
-import com.softKit.softKit_BE.repository.UserRepository;
+import com.softKit.softKit_BE.auth.application.mapper.AuthMapper;
+import com.softKit.softKit_BE.shared.exception.EmailAlreadyInUseException;
+import com.softKit.softKit_BE.user.domain.User;
+import com.softKit.softKit_BE.auth.api.dto.LoginRequest;
+import com.softKit.softKit_BE.auth.api.dto.RegisterRequest;
+import com.softKit.softKit_BE.auth.api.dto.LoginResponse;
+import com.softKit.softKit_BE.auth.api.dto.RegisterResponse;
+import com.softKit.softKit_BE.user.api.dto.UserResponse;
+import com.softKit.softKit_BE.user.domain.enums.Role;
+import com.softKit.softKit_BE.user.domain.enums.Status;
+import com.softKit.softKit_BE.user.application.mapper.UserMapper;
+import com.softKit.softKit_BE.user.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,8 +23,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -33,6 +36,9 @@ class AuthServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private AuthMapper authMapper;
 
 	@Mock
 	private UserMapper userMapper;
@@ -66,7 +72,7 @@ class AuthServiceTest {
 		when(jwtService.getExpirationMs()).thenReturn(3600000L);
 		when(userMapper.toUserResponse(user))
 				.thenReturn(new UserResponse(
-						1L,
+						UUID.randomUUID(),
 						"John Doe",
 						"john@example.com",
 						"+5511999999999",
@@ -74,8 +80,8 @@ class AuthServiceTest {
 						Status.ACTIVE,
 						null,
 						null,
-						LocalDateTime.now(),
-						LocalDateTime.now()
+						OffsetDateTime.now(),
+						OffsetDateTime.now()
 				));
 
 		LoginResponse response = authService.login(request);
@@ -110,24 +116,24 @@ class AuthServiceTest {
 		when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
 
 		User user = new User("John Doe", "john@example.com", null, Role.CUSTOMER);
-		when(userMapper.fromRegisterRequestToEntity(request)).thenReturn(user);
+		when(authMapper.fromRegisterRequestToEntity(request)).thenReturn(user);
 		when(passwordEncoder.encode("Password123")).thenReturn("hashed");
 		user.setPasswordHash("hashed");
 		user.setStatus(Status.ACTIVE);
 
 		User savedUser = user;
-		savedUser.setEmailVerifiedAt(LocalDateTime.now());
+		savedUser.setEmailVerifiedAt(OffsetDateTime.now());
 		when(userRepository.save(user)).thenReturn(savedUser);
 
 		RegisterResponse registerResponse = new RegisterResponse(
-				1L,
+				UUID.randomUUID(),
 				"John Doe",
 				"john@example.com",
 				"+5511999999999",
-				LocalDateTime.now(),
-				LocalDateTime.now()
+				OffsetDateTime.now(),
+				OffsetDateTime.now()
 		);
-		when(userMapper.toRegisterResponse(savedUser)).thenReturn(registerResponse);
+		when(authMapper.toRegisterResponse(savedUser)).thenReturn(registerResponse);
 
 		RegisterResponse response = authService.register(request);
 
@@ -151,5 +157,53 @@ class AuthServiceTest {
 				() -> authService.register(request));
 
 		verify(userRepository, never()).save(any());
+	}
+
+	@Test
+	void validateToken_shouldReturnTrue_whenTokenValidAndUserExists() {
+		String token = "jwt-token";
+		User user = new User();
+		user.setUsername("john@example.com");
+
+		when(jwtService.extractUsername(token)).thenReturn("john@example.com");
+		when(userRepository.findByEmail("john@example.com")).thenReturn(user);
+		when(jwtService.isTokenValid(token, user)).thenReturn(true);
+
+		boolean result = authService.validateToken(token);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void validateToken_shouldReturnFalse_whenUserDoesNotExist() {
+		String token = "jwt-token";
+
+		when(jwtService.extractUsername(token)).thenReturn("john@example.com");
+		when(userRepository.findByEmail("john@example.com")).thenReturn(null);
+
+		boolean result = authService.validateToken(token);
+
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	void validateToken_shouldReturnFalse_whenJwtServiceThrows() {
+		String token = "invalid-token";
+		when(jwtService.extractUsername(token)).thenThrow(new RuntimeException("Invalid"));
+
+		boolean result = authService.validateToken(token);
+
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	void extractEmailFromToken_shouldDelegateToJwtService() {
+		String token = "jwt-token";
+		when(jwtService.extractUsername(token)).thenReturn("john@example.com");
+
+		String email = authService.extractEmailFromToken(token);
+
+		assertThat(email).isEqualTo("john@example.com");
+		verify(jwtService).extractUsername(token);
 	}
 }
