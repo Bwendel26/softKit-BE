@@ -1,4 +1,4 @@
-package com.softKit.softKit_BE.model.dto.responses;
+package com.softKit.softKit_BE.model.dto.response;
 
 public record LoginResponse(
 		String token,

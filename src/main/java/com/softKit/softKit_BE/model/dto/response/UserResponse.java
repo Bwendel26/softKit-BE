@@ -1,7 +1,7 @@
-package com.softKit.softKit_BE.model.dto.responses;
+package com.softKit.softKit_BE.model.dto.response;
 
-import com.softKit.softKit_BE.model.Enums.Role;
-import com.softKit.softKit_BE.model.Enums.Status;
+import com.softKit.softKit_BE.model.enums.Role;
+import com.softKit.softKit_BE.model.enums.Status;
 
 import java.time.LocalDateTime;
 

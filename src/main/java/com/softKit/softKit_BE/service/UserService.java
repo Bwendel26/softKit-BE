@@ -2,10 +2,10 @@ package com.softKit.softKit_BE.service;
 
 import com.softKit.softKit_BE.exception.EmailAlreadyInUseException;
 import com.softKit.softKit_BE.exception.UserNotFoundException;
-import com.softKit.softKit_BE.model.Enums.Status;
+import com.softKit.softKit_BE.model.enums.Status;
 import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.dto.requests.*;
-import com.softKit.softKit_BE.model.dto.responses.UserResponse;
+import com.softKit.softKit_BE.model.dto.request.*;
+import com.softKit.softKit_BE.model.dto.response.UserResponse;
 import com.softKit.softKit_BE.model.mapper.UserMapper;
 import com.softKit.softKit_BE.repository.UserRepository;
 import org.springframework.data.domain.Page;

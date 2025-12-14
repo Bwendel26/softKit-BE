@@ -1,6 +1,6 @@
-package com.softKit.softKit_BE.model.dto.requests;
+package com.softKit.softKit_BE.model.dto.request;
 
-import com.softKit.softKit_BE.model.Enums.Status;
+import com.softKit.softKit_BE.model.enums.Status;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateUserStatusRequest(

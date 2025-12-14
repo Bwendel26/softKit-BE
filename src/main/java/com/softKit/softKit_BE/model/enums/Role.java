@@ -1,4 +1,4 @@
-package com.softKit.softKit_BE.model.Enums;
+package com.softKit.softKit_BE.model.enums;
 
 public enum Role {
     ADMIN,

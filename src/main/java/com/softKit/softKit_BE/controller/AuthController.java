@@ -1,11 +1,11 @@
 package com.softKit.softKit_BE.controller;
 
-import com.softKit.softKit_BE.model.dto.requests.ForgotPasswordRequest;
-import com.softKit.softKit_BE.model.dto.requests.LoginRequest;
-import com.softKit.softKit_BE.model.dto.requests.RegisterRequest;
-import com.softKit.softKit_BE.model.dto.requests.ResetPasswordRequest;
-import com.softKit.softKit_BE.model.dto.responses.LoginResponse;
-import com.softKit.softKit_BE.model.dto.responses.RegisterResponse;
+import com.softKit.softKit_BE.model.dto.request.ForgotPasswordRequest;
+import com.softKit.softKit_BE.model.dto.request.LoginRequest;
+import com.softKit.softKit_BE.model.dto.request.RegisterRequest;
+import com.softKit.softKit_BE.model.dto.request.ResetPasswordRequest;
+import com.softKit.softKit_BE.model.dto.response.LoginResponse;
+import com.softKit.softKit_BE.model.dto.response.RegisterResponse;
 import com.softKit.softKit_BE.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;

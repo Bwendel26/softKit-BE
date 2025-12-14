@@ -1,8 +1,8 @@
 package com.softKit.softKit_BE.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.softKit.softKit_BE.model.Enums.Role;
-import com.softKit.softKit_BE.model.Enums.Status;
+import com.softKit.softKit_BE.model.enums.Role;
+import com.softKit.softKit_BE.model.enums.Status;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

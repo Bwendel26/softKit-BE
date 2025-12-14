@@ -1,4 +1,4 @@
-package com.softKit.softKit_BE.model.dto.requests;
+package com.softKit.softKit_BE.model.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

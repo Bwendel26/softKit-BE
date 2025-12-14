@@ -1,12 +1,12 @@
 package com.softKit.softKit_BE.model.mapper;
 
 import com.softKit.softKit_BE.model.User;
-import com.softKit.softKit_BE.model.dto.requests.RegisterRequest;
-import com.softKit.softKit_BE.model.dto.requests.UserCreateRequest;
-import com.softKit.softKit_BE.model.dto.requests.UserSelfUpdateRequest;
-import com.softKit.softKit_BE.model.dto.requests.UserUpdateRequest;
-import com.softKit.softKit_BE.model.dto.responses.RegisterResponse;
-import com.softKit.softKit_BE.model.dto.responses.UserResponse;
+import com.softKit.softKit_BE.model.dto.request.RegisterRequest;
+import com.softKit.softKit_BE.model.dto.request.UserCreateRequest;
+import com.softKit.softKit_BE.model.dto.request.UserSelfUpdateRequest;
+import com.softKit.softKit_BE.model.dto.request.UserUpdateRequest;
+import com.softKit.softKit_BE.model.dto.response.RegisterResponse;
+import com.softKit.softKit_BE.model.dto.response.UserResponse;
 import org.mapstruct.*;
 
 @Mapper(

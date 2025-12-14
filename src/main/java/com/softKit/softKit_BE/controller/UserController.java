@@ -1,8 +1,8 @@
 package com.softKit.softKit_BE.controller;
 
 
-import com.softKit.softKit_BE.model.dto.requests.*;
-import com.softKit.softKit_BE.model.dto.responses.UserResponse;
+import com.softKit.softKit_BE.model.dto.request.*;
+import com.softKit.softKit_BE.model.dto.response.UserResponse;
 import com.softKit.softKit_BE.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
