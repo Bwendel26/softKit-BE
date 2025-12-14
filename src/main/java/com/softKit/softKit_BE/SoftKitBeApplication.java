@@ -1,6 +1,6 @@
 package com.softKit.softKit_BE;
 
-import com.softKit.softKit_BE.config.CorsProperties;
+import com.softKit.softKit_BE.shared.config.security.CorsProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
