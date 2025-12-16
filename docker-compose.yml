@@ -8,18 +8,19 @@ volumes:
   db-data:
 
 services:
-  mysql-db:
-    image: mysql:8.0
-    container_name: mysql-db
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: soft-kit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authentication_db
     ports:
-      - "3306:3306"
+      - "5433:5432"
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       timeout: 3s
       retries: 30
       interval: 5s
@@ -29,18 +30,18 @@ services:
 
   auth-service:
     build:
-      context: ./softKit-BE
+      context: ./
       dockerfile: Dockerfile
     container_name: auth-service
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/softkit?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/authentication_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
       JAVA_OPTS: -Xms256m -Xmx384m
     depends_on:
-      mysql-db:
+      postgres-db:
         condition: service_healthy
     networks:
       - app-network
